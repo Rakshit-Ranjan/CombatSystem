@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb32dc4cd2c0ab64a91fa2c4ce5d8a44, type: 3}
+  m_Name: HeavyAttackChain
+  m_EditorClassIdentifier: 
+  ChainName: HeavyAttackChain
+  Description: 
+  Attacks:
+  - {fileID: 11400000, guid: 47c214de05f02c6409e4b6afae2e3677, type: 2}
+  - {fileID: 11400000, guid: dfa35ff8c975dc548990278e1d7aa4b0, type: 2}
+  - {fileID: 11400000, guid: 252669b64f96b7349a71c2fb9b08980d, type: 2}
+  - {fileID: 11400000, guid: 3670142cfe1f0b24dbd78ec1b9a3daa3, type: 2}
+  minStamina: 0
+  requireGrounded: 1
+  requireCombatStance: 1
