@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerLocomotionController : MonoBehaviour {
+
     [Header("References")]
     [SerializeField] private CharacterController controller;
     [SerializeField] private Animator animator;
@@ -40,9 +41,6 @@ public class PlayerLocomotionController : MonoBehaviour {
 
     // Animation hashes
     private int speedHash;
-    private int velocityXHash;
-    private int velocityZHash;
-    private int isMovingHash;
 
     // Public properties
     public Vector2 MoveInput => moveInput;
@@ -58,12 +56,7 @@ public class PlayerLocomotionController : MonoBehaviour {
         mainCam = Camera.main;
 
         inputActions = new InputSystem_Actions();
-
-        // Cache animator parameter hashes
         speedHash = Animator.StringToHash("Speed");
-        // velocityXHash = Animator.StringToHash("VelocityX");
-        // velocityZHash = Animator.StringToHash("VelocityZ");
-        isMovingHash = Animator.StringToHash("IsMoving");
     }
 
     private void OnEnable() {
@@ -151,14 +144,14 @@ public class PlayerLocomotionController : MonoBehaviour {
             moveDirection = (cameraForward * moveInput.y + cameraRight * moveInput.x).normalized;
 
             // Apply movement
-            controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+            controller.Move(currentSpeed * Time.deltaTime * moveDirection);
         }
         else {
             moveDirection = Vector3.zero;
         }
 
         // Apply gravity
-        controller.Move(Vector3.down * 9.81f * Time.deltaTime);
+        controller.Move(9.81f * Time.deltaTime * Vector3.down);
     }
 
     private void HandleRotation() {

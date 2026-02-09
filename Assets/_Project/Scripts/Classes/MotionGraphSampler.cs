@@ -1,9 +1,10 @@
 using UnityEngine;
 using System;
-public class MotionGraphSampler {
 
-    private MotionGraph motionGraph;
-    private float previousTime;
+public class MotionGraphSampler {   
+
+    public MotionGraph motionGraph;
+    public float previousTime;
 
     public void Begin(MotionGraph motionGraph) {
         this.motionGraph = motionGraph;

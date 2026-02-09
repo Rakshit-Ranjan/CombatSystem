@@ -12,8 +12,8 @@ public enum InputActionType {
     DODGE
 }
 
-public enum HitReactionType {
-    
-    HEAD, LEGS, ARMS, BODY, LIGHT, HEAVY
 
-} 
+public enum HitDirectionType {
+    FORWARD, BACK, LEFT, RIGHT
+}
+

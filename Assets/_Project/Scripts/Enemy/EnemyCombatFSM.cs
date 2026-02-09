@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -9,7 +8,6 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField]
     private HurtboxReactionMap[] hurtboxReactionMaps;
 
-    [SerializeField]
     private MotionGraphSampler sampler;
 
     [SerializeField]
@@ -44,7 +42,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
     }
 
-    private void HandleIdleState() => Debug.Log("Idling");
+    private void HandleIdleState() {
+        
+    }
 
     private void HandleStunnedState() {
         float normalizedTime = stateTimer/stunnedStateTimer;
@@ -52,7 +52,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
         controller.Move(worldDelta);
 
-        if(stateTimer > stunnedStateTimer) {
+        if(stateTimer >= stunnedStateTimer) {
             sampler.Reset();
             TransitionTo(CombatState.IDLE);
         }
@@ -64,39 +64,53 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     public void OnIncomingAttack(AttackContext ctx) {
-        Debug.Log($"{ctx.attacker} hit the {ctx.hurtboxType} of Enemy");
         DamageData data = new DamageData {
             attacker = ctx.attacker,
             damage = ctx.attackData.damage,
             poiseDamage = ctx.attackData.damage
         };
-        HitReactionData reaction = GetHitReaction(ctx.hurtboxType);
+        float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
+        HitDirectionType directionType;
+        if(angleOfAttack >= -45f && angleOfAttack <= 45f) {
+            directionType = HitDirectionType.BACK;
+        } else if(angleOfAttack > 45 && angleOfAttack <= 135f) {
+            directionType = HitDirectionType.LEFT;
+        } else if(angleOfAttack >= -135f && angleOfAttack < -45f) {
+            directionType = HitDirectionType.RIGHT;
+        } else {
+            directionType = HitDirectionType.FORWARD;
+        }
+        Debug.Log(directionType);
+        HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
         sampler.Begin(reaction.hitReactionGraph);
         stunnedStateTimer = reaction.hitReactionDuraion;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         TransitionTo(CombatState.STUNNED);
         if(reaction != null) {
             PlayHitReaction(reaction);
-            Debug.Log("Play hit reaction");
         }
-        
+        /*
+            Add angled based hit animation here
+            0-180 the enemy is being hit on from its left
+            -180-0 the enemy is being hit on from its right
+         */
         health.TakeDamage(data);
     }
 
     public void PlayHitReaction(HitReactionData data) {
-        animator.Play("Body Hit");
+        animator.Play(data.clip.name);
     }
 
-    private HitReactionData GetHitReaction(HurtboxType type) {
+    private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
         
         foreach(var map in hurtboxReactionMaps) {
             
-            if(map.hurtboxType == type)
+            if(map.hurtboxType == type && map.hitDirectionType == directionType)
                 return map.data;
 
         }
 
-        return null;
+        return hurtboxReactionMaps[0].data;
 
     }
 
