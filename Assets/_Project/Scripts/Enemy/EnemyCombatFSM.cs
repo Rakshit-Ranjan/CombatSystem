@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -7,6 +8,8 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private EnemyHealth health;
     [SerializeField]
     private HurtboxReactionMap[] hurtboxReactionMaps;
+
+    public bool CanAttack {get; private set;}
 
     private MotionGraphSampler sampler;
 
@@ -114,4 +117,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     }
 
+    public void TryStartAttack() {
+        Debug.Log("Trying to attack");     
+    }
 }

@@ -17,3 +17,7 @@ public enum HitDirectionType {
     FORWARD, BACK, LEFT, RIGHT
 }
 
+public enum EnemyIntent {
+    IDLE, CHASE, ATTACK
+} 
+

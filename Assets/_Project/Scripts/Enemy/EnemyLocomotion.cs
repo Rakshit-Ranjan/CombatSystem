@@ -28,11 +28,6 @@ public class EnemyLocomotion : MonoBehaviour {
         agent.updatePosition = false;
         agent.updateRotation = false;
     }
-
-    void Update() {
-        HandleLocomotion();
-    }
-
     public void Move(Vector3 direction) {
         
         controller.Move(moveSpeed * Time.deltaTime * direction.normalized);
@@ -55,11 +50,10 @@ public class EnemyLocomotion : MonoBehaviour {
     }
 
     public void HandleLocomotion() {
-        agent.SetDestination(player.position);
         if(agent.desiredVelocity.magnitude > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
-            FaceDirection(player.position - transform.position);
+            FaceDirection(agent.desiredVelocity);
         }
     }
 
