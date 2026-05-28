@@ -25,6 +25,11 @@ public class EnemyController : MonoBehaviour {
     
     private void HandleStates() {
         
+        if(combat.BlocksLocomotion) {
+            locomotion.Stop();
+            return;
+        }
+
         switch(brain.CurrentIntent) {
             
             case EnemyIntent.IDLE:
@@ -37,9 +42,6 @@ public class EnemyController : MonoBehaviour {
                 break;
             case EnemyIntent.ATTACK:
                 locomotion.Stop();
-                if(combat.CanAttack){
-                    combat.TryStartAttack();
-                }
                 break;
             default:
                 print("Hello World");

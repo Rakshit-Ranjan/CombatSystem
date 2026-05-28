@@ -2,6 +2,7 @@ using UnityEngine;
 
 public enum CombatState {
     IDLE,
+    WINDUP,
     ATTACKING,
     BLOCKING,
     DODGING,

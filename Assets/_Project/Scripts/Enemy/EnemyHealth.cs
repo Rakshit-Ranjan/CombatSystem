@@ -15,7 +15,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable {
 
     public void TakeDamage(DamageData data) {
         health -= data.damage;
-        Debug.Log($"{transform.name} got hit by {data.attacker}. \n Health is now {health}");
     } 
 
 }

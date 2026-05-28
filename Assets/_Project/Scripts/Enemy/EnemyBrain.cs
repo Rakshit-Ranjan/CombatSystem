@@ -13,6 +13,7 @@ public class EnemyBrain : MonoBehaviour {
 
     void Awake() {
         perception = GetComponent<EnemyPerception>();
+        CurrentIntent = EnemyIntent.IDLE;
     }
 
     void Update() {
