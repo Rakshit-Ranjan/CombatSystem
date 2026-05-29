@@ -27,6 +27,8 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField] private float stateTimer;
     [SerializeField] private float parryTimer;
     [SerializeField] private float dodgeTimer;
+    [SerializeField] private float stunnedStateOffset;
+    [SerializeField] private float stunnedTimer;
     [SerializeField] private float dodgeCooldown;
     [SerializeField] private int comboIndex;
     [SerializeField] private bool hasQueuedCombo;
@@ -35,11 +37,15 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField] private ParryData parryData;
     [SerializeField] private DodgeData dodgeData;
     [SerializeField] private Hitbox weaponHitbox;
+    [SerializeField]private HurtboxReactionMap[] hurtboxReactionMaps;
+
     private Vector3 worldDodgeDir;
     private Vector3 localDodgeDir;
     private Vector3 DodgeForward, DodgeUp, DodgeRight;
+    private Vector3 HitForward, HitRight, HitUp;
     private MotionGraphSampler attackSampler;
     private MotionGraphSampler dodgeSampler;
+    private MotionGraphSampler stunnedSampler;
 
     private int attackHash;
     private int comboIndexHash;
@@ -56,6 +62,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         if (inputBuffer == null) inputBuffer = GetComponent<InputBuffer>();
         attackSampler = new MotionGraphSampler();
         dodgeSampler = new MotionGraphSampler();
+        stunnedSampler = new MotionGraphSampler();
         attackHash = Animator.StringToHash("Attack");
         comboIndexHash = Animator.StringToHash("ComboIndex");
         weaponHitbox = GetComponentInChildren<Hitbox>();
@@ -77,6 +84,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                 break;
             case CombatState.DODGING:
                 HandleDodgingState();
+                break;
+            case CombatState.STUNNED:
+                HandleStunnedState();
                 break;
                 // Additional states like BLOCKING, DODGING, STUNNED can be handled here
         }
@@ -220,6 +230,19 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         }
     }
 
+    private void HandleStunnedState() {
+        float normalizedTime = stateTimer/(stunnedTimer - stunnedStateOffset);
+        (Vector3 localDelta, float deltaYaw) = stunnedSampler.Sample(normalizedTime);
+        Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
+        locomotion.ApplyAttackMovement(worldDelta);
+        locomotion.LockMovement();
+        
+        if(stateTimer >= stunnedTimer) {
+            stunnedSampler.Reset();
+            locomotion.UnlockMovement();
+            TransitionTo(CombatState.IDLE);
+        }
+    }
     /* Helper Methods */
     public void ExitDodgingState() {
         TransitionToIdle();
@@ -324,7 +347,54 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     public void OnIncomingAttack(AttackContext ctx) {
+        // print("Got hit by enemy");
+        DamageData data = new DamageData {
+            attacker = ctx.attacker,
+            damage = ctx.attackData.damage,
+            poiseDamage = ctx.attackData.damage
+        };
+        float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
+        HitDirectionType directionType;
+        if(angleOfAttack >= -45f && angleOfAttack <= 45f) {
+            directionType = HitDirectionType.BACK;
+        } else if(angleOfAttack > 45 && angleOfAttack <= 135f) {
+            directionType = HitDirectionType.LEFT;
+        } else if(angleOfAttack >= -135f && angleOfAttack < -45f) {
+            directionType = HitDirectionType.RIGHT;
+        } else {
+            directionType = HitDirectionType.FORWARD;
+        }
+        HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
+        stunnedSampler.Begin(reaction.hitReactionGraph);
+        stunnedTimer = reaction.hitReactionDuraion + stunnedStateOffset;
+        (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
+        TransitionTo(CombatState.STUNNED);
+        // if(reaction != null) {
+        //     PlayHitReaction(reaction);
+        // }
+        /*
+            Add angled based hit animation here
+            0-180 the enemy is being hit on from its left
+            -180-0 the enemy is being hit on from its right
+         */
+        //health.TakeDamage(data);
+    }
+
+    public void PlayHitReaction(HitReactionData data) {
+        animator.Play(data.clip.name);
+    }
+
+    private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
         
+        foreach(var map in hurtboxReactionMaps) {
+            
+            if(map.hurtboxType == type && map.hitDirectionType == directionType)
+                return map.data;
+
+        }
+
+        return hurtboxReactionMaps[0].data;
+
     }
 
 }

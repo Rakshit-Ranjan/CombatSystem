@@ -16,7 +16,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     //ATTACK STATE VARIABLES
     [SerializeField] private AttackData currentAttack;
     [SerializeField]private AttackChain lightAttackChain;
-
+    [SerializeField] private Hitbox weaponHitbox;
 
     private CharacterController controller;
     private MotionGraphSampler stunnedSampler;
@@ -32,13 +32,14 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         enemyController = GetComponent<EnemyController>();
         locomotion = GetComponent<EnemyLocomotion>();
         brain = GetComponent<EnemyBrain>();
+        weaponHitbox = GetComponentInChildren<Hitbox>();
         combatState = CombatState.IDLE;
         stunnedSampler = new MotionGraphSampler();
         attackSampler = new MotionGraphSampler();
     }
 
     void Update() {
-        BlocksLocomotion = combatState == CombatState.STUNNED || combatState == CombatState.ATTACKING;
+        BlocksLocomotion = combatState == CombatState.STUNNED || combatState == CombatState.ATTACKING || combatState == CombatState.WINDUP;
         stateTimer += Time.deltaTime;
         if(attackTimer > 0) 
             attackTimer -= Time.deltaTime;
@@ -58,6 +59,10 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
     }
 
+
+    /// <summary>
+    /// handling states
+    /// </summary>
     private void HandleIdleState() {
         //first check if enemy intent is in attack
         //attack every 3 seconds
@@ -67,18 +72,29 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private void HandleWindupState() {
+        //ABORTING ATTACK
+        if(brain.CurrentIntent != EnemyIntent.ATTACK) {
+            BlocksLocomotion = false;
+            TransitionTo(CombatState.IDLE);
+            return;
+        }
+        //ROTATE TOWARDS PLAYER
         Vector3 toPlayer = enemyController.playerT.position - transform.position;
         toPlayer.y = 0;
-        Quaternion lookRotation = Quaternion.LookRotation(toPlayer.normalized);
         if(toPlayer.magnitude < 0.001f) return;
+        Quaternion lookRotation = Quaternion.LookRotation(toPlayer.normalized);
         transform.rotation = Quaternion.Slerp(
             transform.rotation, 
             lookRotation,
-            locomotion.rotationSpeed
+            locomotion.rotationSpeed * Time.deltaTime
         );
+
+
+        //STARTING ATTACK
         if(Vector3.Angle(transform.forward, toPlayer.normalized) < attackFacingThreshold) {
             StartAttack();
         }
+
     }
 
     private void HandleAttackingState() {
@@ -100,6 +116,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             attackTimer = timeBetweenAttack;
             attackSampler.Reset();
             currentAttack = null;
+            BlocksLocomotion = false;
             TransitionTo(CombatState.IDLE);
         }
 
@@ -122,6 +139,11 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         combatState = state;
     }
 
+    /// <summary>
+    /// handling incoming attacks
+    /// create dmgdata --> hitrxtdata
+    /// </summary>
+    /// <param name="ctx"></param>
     public void OnIncomingAttack(AttackContext ctx) {
         DamageData data = new DamageData {
             attacker = ctx.attacker,
@@ -160,6 +182,20 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         animator.Play(data.clip.name);
     }
 
+    public void StartAttack() {
+        if(lightAttackChain == null || lightAttackChain.Attacks.Length <= 0) return;
+
+        currentAttack = lightAttackChain.GetRandomAttack();
+        if(currentAttack.attackClip != null) {
+            animator.Play(currentAttack.attackName);
+        }
+        if (currentAttack.motionGraph != null) {
+            attackSampler.Begin(currentAttack.motionGraph);
+        }
+        weaponHitbox.SetAttackData(currentAttack);
+        TransitionTo(CombatState.ATTACKING);
+    }
+   
     private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
         
         foreach(var map in hurtboxReactionMaps) {
@@ -173,15 +209,4 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     }
 
-    public void StartAttack() {
-        if(lightAttackChain == null) return;
-        currentAttack = lightAttackChain.GetRandomAttack();
-        if(currentAttack.attackClip != null) {
-            animator.Play(currentAttack.attackName);
-        }
-        if (currentAttack.motionGraph != null) {
-            attackSampler.Begin(currentAttack.motionGraph);
-        }
-        TransitionTo(CombatState.ATTACKING);
-    }
 }

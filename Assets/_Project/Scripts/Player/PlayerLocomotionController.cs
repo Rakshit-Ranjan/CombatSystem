@@ -204,6 +204,11 @@ public class PlayerLocomotionController : MonoBehaviour {
         }
         controller.Move(worldDelta);
     }
+
+    public void ApplyAttackMovement(Vector3 worldDelta) {
+        
+        controller.Move(worldDelta);
+    }
     public void SetCombatMode(bool inCombat) {
         isInCombat = inCombat;
         if (inCombat && isSprinting) {
