@@ -195,6 +195,14 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         weaponHitbox.SetAttackData(currentAttack);
         TransitionTo(CombatState.ATTACKING);
     }
+
+    public void EnableWeaponHitbox() {
+        weaponHitbox.EnableHitbox();
+    }
+    
+    public void DisableWeaponHitbox() {
+        weaponHitbox.DisableHitbox();
+    }
    
     private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
         

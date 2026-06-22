@@ -190,9 +190,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     private void HandleDodgingState() {
         dodgeTimer += Time.deltaTime;
         float endTime = dodgeData.duration;
-        // if (dodgeTimer > endTime) {
-        //     TransitionToIdle();
-        // }
+        if (dodgeTimer > endTime) {
+            TransitionToIdle();
+        }
         float normalizedTime = dodgeTimer / dodgeData.duration;
         (Vector3 localDelta, float yawDelta) = dodgeSampler.Sample(normalizedTime);
         Vector3 worldDelta = DodgeForward * localDelta.z + DodgeRight * localDelta.x + DodgeUp * localDelta.y;
@@ -226,6 +226,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             return;
 
         if (currentState == CombatState.IDLE) {
+            inputBuffer.TryConsumeInput(out _);
             StartDodge();
         }
     }
@@ -369,9 +370,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         stunnedTimer = reaction.hitReactionDuraion + stunnedStateOffset;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         TransitionTo(CombatState.STUNNED);
-        // if(reaction != null) {
-        //     PlayHitReaction(reaction);
-        // }
+        if(reaction != null) {
+            PlayHitReaction(reaction);
+        }
         /*
             Add angled based hit animation here
             0-180 the enemy is being hit on from its left

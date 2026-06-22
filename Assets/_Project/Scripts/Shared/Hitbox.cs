@@ -61,7 +61,7 @@ public class Hitbox: MonoBehaviour {
         };
 
         reciever.OnIncomingAttack(ctx);
-        hitTargets.Clear();
+        hitTargets.Clear(); // REMOVE WHEN YOU PROPERLY SET ANIMATION EVENTS
     }
 
 
