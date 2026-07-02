@@ -17,6 +17,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField] private Animator animator;
     [SerializeField] private InputBuffer inputBuffer;
     [SerializeField] private PlayerLocomotionController locomotion;
+    [SerializeField] private PlayerHealth health;
 
     [Header("Attack Chains")]
     [SerializeField] private AttackChain lightAttackChain;
@@ -60,6 +61,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         if (animator == null) animator = GetComponent<Animator>();
         if (locomotion == null) locomotion = GetComponent<PlayerLocomotionController>();
         if (inputBuffer == null) inputBuffer = GetComponent<InputBuffer>();
+        if(health == null) health = GetComponent<PlayerHealth>();
         attackSampler = new MotionGraphSampler();
         dodgeSampler = new MotionGraphSampler();
         stunnedSampler = new MotionGraphSampler();
@@ -288,6 +290,12 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         animator.Play("Dodge");
     }
 
+    public void EnableHitbox() {
+        weaponHitbox.EnableHitbox();
+    }
+    public void DisableHitbox() {
+        weaponHitbox.DisableHitbox();
+    }
 
     /*
         get next attack
@@ -378,7 +386,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             0-180 the enemy is being hit on from its left
             -180-0 the enemy is being hit on from its right
          */
-        //health.TakeDamage(data);
+        health.TakeDamage(data);
     }
 
     public void PlayHitReaction(HitReactionData data) {
