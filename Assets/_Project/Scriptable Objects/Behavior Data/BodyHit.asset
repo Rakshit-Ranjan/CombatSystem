@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HitReactionData
   clip: {fileID: 7400000, guid: 8135b5c7235fab94ca0cd6bf33a36635, type: 2}
   hitReactionGraph: {fileID: 11400000, guid: 829150aec20b5cd4fa1a7d3ea5bdd2d6, type: 2}
-  hitReactionDuraion: 0.1
+  hitReactionDuraion: 0.75
+  hitReactionForce: 0.25

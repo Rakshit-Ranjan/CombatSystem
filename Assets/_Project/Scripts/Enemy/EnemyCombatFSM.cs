@@ -11,7 +11,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField]private EnemyLocomotion locomotion;
     [SerializeField]private HurtboxReactionMap[] hurtboxReactionMaps;
     [SerializeField]private CombatState combatState;
-    [SerializeField]private float stateTimer, stunnedStateTimer, stunnedStateOffset;
+    [SerializeField]private float stateTimer, stunnedStateTimer, stunnedStateMovingTimer; //stunned state moving timer dictates how long the player moves in the stunned state and is calculated using hitreaction.hitreactionforce
     [SerializeField]private float timeBetweenAttack, attackTimer, attackFacingThreshold; // every n seconds do an attack
     //ATTACK STATE VARIABLES
     [SerializeField] private AttackData currentAttack;
@@ -123,7 +123,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private void HandleStunnedState() {
-        float normalizedTime = stateTimer/(stunnedStateTimer - stunnedStateOffset);
+        float normalizedTime = stateTimer/(stunnedStateMovingTimer);
         (Vector3 localDelta, float deltaYaw) = stunnedSampler.Sample(normalizedTime);
         Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
         controller.Move(worldDelta);
@@ -163,7 +163,8 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
         HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
         stunnedSampler.Begin(reaction.hitReactionGraph);
-        stunnedStateTimer = reaction.hitReactionDuraion + stunnedStateOffset;
+        stunnedStateTimer = reaction.hitReactionDuraion;
+        stunnedStateMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         TransitionTo(CombatState.STUNNED);
         if(reaction != null) {
@@ -175,7 +176,6 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             -180-0 the enemy is being hit on from its right
          */
         health.TakeDamage(data);
-        print("got attack");
     }
 
     public void PlayHitReaction(HitReactionData data) {
@@ -194,6 +194,26 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
         weaponHitbox.SetAttackData(currentAttack);
         TransitionTo(CombatState.ATTACKING);
+    }
+
+    public void EnterParryStun(Transform source, AttackContext ctx, HitDirectionType directionType) {
+        print("Enter Stunned state");
+        weaponHitbox.DisableHitbox();
+        attackSampler.Reset();
+        currentAttack= null;
+        Vector3 stunDir = (transform.position - source.position).normalized;
+        stunDir.y = 0f;
+
+        HitForward = stunDir;
+        HitUp = Vector3.up;
+        HitRight = Vector3.Cross(Vector3.up, stunDir).normalized;
+        HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
+        stunnedSampler.Begin(reaction.hitReactionGraph);
+        stunnedStateTimer = reaction.hitReactionDuraion;
+        stunnedStateMovingTimer = reaction.hitReactionForce;
+        attackTimer = timeBetweenAttack;
+        PlayHitReaction(reaction);
+        TransitionTo(CombatState.STUNNED);
     }
 
     public void EnableWeaponHitbox() {

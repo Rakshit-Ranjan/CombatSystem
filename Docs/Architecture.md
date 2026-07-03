@@ -56,8 +56,8 @@ The architecture is intentionally data-driven for animation-bound gameplay and i
 - `EnemyBrain`: converts perception into a coarse intent (`IDLE`, `CHASE`, `ATTACK`).
 - `EnemyController`: bridges AI intent into locomotion or combat ownership.
 - `EnemyLocomotion`: executes movement using `NavMeshAgent` plus `CharacterController`.
-- `EnemyCombatFSM`: owns attack windup, attack execution, stun reactions, hitbox setup, and locomotion lock state.
-- `EnemyHealth`: owns enemy HP.
+- `EnemyCombatFSM`: owns attack windup, attack execution, stun reactions, parry-stun entry, hitbox setup, and locomotion lock state.
+- `EnemyHealth`: owns enemy HP with separate max/current values and local death detection.
 
 ### Shared Combat Stack
 - `Hitbox`: active attack collider that emits `AttackContext`.
@@ -65,6 +65,7 @@ The architecture is intentionally data-driven for animation-bound gameplay and i
 - `AttackContext`: attacker-to-defender payload containing attack asset, direction, origin, and hit region.
 - `DamageData`: defender-side damage payload.
 - `HurtboxReactionMap`: maps hurtbox type + direction to a specific `HitReactionData`.
+- `HitReactionData`: now defines both total reaction duration and a separate movement-force window used during stunned displacement.
 
 ### Motion System
 - `MotionGraph`: ScriptableObject containing cumulative displacement and yaw curves.
@@ -223,6 +224,6 @@ graph TD
 - `Hitbox` should not decide damage rules; it only detects a hit and emits context.
 
 ## Current Architectural Notes
-- Combat is already strongly asset-driven, but health/death, dodge/parry validation, and anti-repeat-hit rules are still mid-implementation.
+- Combat is already strongly asset-driven, and recent changes further separated reaction lock time from reaction movement time, but dodge/parry validation and anti-repeat-hit rules are still mid-implementation.
 - Enemy AI is intentionally simple and layered for future expansion.
 - Terrain utilities are currently separate from combat and should stay that way.

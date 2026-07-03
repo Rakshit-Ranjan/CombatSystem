@@ -10,6 +10,8 @@
 - [x] Enemy single-attack execution
 - [x] Player health component
 - [x] Enemy health component
+- [x] Enemy parry-stun response path
+- [x] Separate hit reaction duration vs movement timing
 - [ ] Stable one-hit-per-swing lifecycle
 - [ ] Full dodge damage validation
 - [ ] Full parry damage validation

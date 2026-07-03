@@ -8,5 +8,6 @@ public class HitReactionData : ScriptableObject {
     public AnimationClip clip;
     public MotionGraph hitReactionGraph;
     public float hitReactionDuraion;
+    public float hitReactionForce; //ALWAYS KEEP HITREACTIONFORCE <= HITREACTIONDURATION
 
 }

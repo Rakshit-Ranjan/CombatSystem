@@ -65,6 +65,7 @@ Responsibilities:
 - own attack commitment
 - own attack windup and attack execution
 - own hit reaction execution
+- own the enemy-side stun response to a successful player parry
 - expose whether combat currently blocks locomotion
 
 ## Why Brain Never Executes Movement
@@ -134,5 +135,6 @@ flowchart TD
 
 ## Current Architecture Notes
 - Current AI is simple and deterministic by design.
+- `EnemyCombatFSM` now also acts as the entry point for parry-induced enemy stun, while `EnemyController` remains unaware of that low-level combat reaction.
 - The system is prepared for richer `EnemyBrain` logic later, such as utility AI, attack selection policies, circling, or coordination.
 - The existing split is the correct foundation for those upgrades.

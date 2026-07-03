@@ -85,7 +85,9 @@ Finish the full 1v1 combat loop with reliable damage, dodge/parry validation, an
 - Player attacks, combos, dodges, parries, and hit reactions exist.
 - Enemy windup, attack execution, and hit reactions exist.
 - MotionGraph pipeline exists and is shared.
-- Player health now exists and is wired into incoming enemy hits.
+- Player and enemy health both exist as dedicated HP components.
+- Dodge i-frame checking and parry-success branching now exist in the defender-side hit flow.
+- Successful player parries can now push the enemy into a stunned reaction path.
 - Defensive damage rules and hitbox dedupe still need hardening.
 
 ## Three-Minute Mental Model

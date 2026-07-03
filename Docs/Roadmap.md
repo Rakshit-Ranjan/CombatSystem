@@ -22,7 +22,7 @@ Close the core 1v1 melee loop so one enemy and one player can:
 ## Next Milestone
 Defensive combat validation:
 - dodge i-frame rules
-- parry validation
+- parry validation and enemy-side parry stun polish
 - perfect parry / perfect dodge windows
 - stable one-hit-per-swing lifecycle
 
@@ -38,7 +38,7 @@ Defensive combat validation:
 - Some combat state exits still depend on animation-event correctness
 - Duration math assumes valid clips/data in some paths
 - `Hitbox` ownership is inspector-driven and easy to misconfigure
-- Debug logs remain in runtime systems
+- Reaction force timing now depends on valid `HitReactionData` authoring
 
 ## Known Bugs
 - Hitbox target dedupe is still being tuned

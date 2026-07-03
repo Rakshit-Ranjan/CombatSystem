@@ -31,6 +31,7 @@ Responsibilities:
 - rotate toward player before attacking
 - execute attack motion from `AttackData`
 - receive incoming attacks and enter hit reaction states
+- enter a stun reaction when the player's parry succeeds
 - expose `BlocksLocomotion` so AI orchestration knows when combat owns movement
 
 ### `MotionGraph`
@@ -161,6 +162,7 @@ Why it exists:
 - Incoming attacks are mapped to a `HitReactionData`
 - The selected reaction provides both clip and motion graph
 - Stunned state samples that graph to produce hit displacement
+- Reaction data now separates total stun duration from the time window that actually applies reaction movement
 
 Why it exists:
 - allows hit reactions to have authored pushback
@@ -181,8 +183,8 @@ This gives:
 ### Player
 - `IDLE`: can consume attack input
 - `ATTACKING`: owns attack motion and combo logic
-- `PARRYING`: owns parry timing window
-- `DODGING`: owns dodge motion
+- `PARRYING`: owns parry timing window and can reflect an incoming attack into enemy stun
+- `DODGING`: owns dodge motion and ignores hits only during its configured i-frame window
 - `STUNNED`: owns hit reaction motion
 
 ### Enemy
@@ -215,6 +217,8 @@ Implemented:
 - motion-driven attacks, dodges, and hit reactions
 - hitbox / hurtbox collision pipeline
 - player and enemy health components
+- split hit reaction timing between stun duration and movement duration
+- player parry success path that can force the enemy into a stunned reaction
 
 Partially implemented / in progress:
 - dodge/parry damage rules
@@ -225,4 +229,5 @@ Partially implemented / in progress:
 Known weak points:
 - some state paths still rely on animation events
 - some duration math assumes nonzero clip lengths
+- parry stun direction is currently driven by code path defaults and may still need direction-specific tuning
 - `Hitbox` currently contains a temporary comment indicating lifecycle cleanup is still being tuned

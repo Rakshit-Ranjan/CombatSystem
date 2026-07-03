@@ -38,13 +38,11 @@ public class EnemyController : MonoBehaviour {
             case EnemyIntent.CHASE:
                 locomotion.SetTarget(playerT);
                 locomotion.HandleLocomotion();
-                Debug.Log("Agent is set");
                 break;
             case EnemyIntent.ATTACK:
                 locomotion.Stop();
                 break;
             default:
-                print("Hello World");
                 break;
 
         }

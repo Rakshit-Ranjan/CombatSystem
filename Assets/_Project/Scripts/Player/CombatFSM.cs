@@ -28,7 +28,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField] private float stateTimer;
     [SerializeField] private float parryTimer;
     [SerializeField] private float dodgeTimer;
-    [SerializeField] private float stunnedStateOffset;
+    [SerializeField] private float stunnedMovingTimer;
     [SerializeField] private float stunnedTimer;
     [SerializeField] private float dodgeCooldown;
     [SerializeField] private int comboIndex;
@@ -234,7 +234,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private void HandleStunnedState() {
-        float normalizedTime = stateTimer/(stunnedTimer - stunnedStateOffset);
+        float normalizedTime = stateTimer/(stunnedMovingTimer);
         (Vector3 localDelta, float deltaYaw) = stunnedSampler.Sample(normalizedTime);
         Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
         locomotion.ApplyAttackMovement(worldDelta);
@@ -373,16 +373,22 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                         Debug.Log("Dodge Success");
                         return;
                     }
-
-
                 }
-
                 ResolveNormalHit(ctx, data);
-
                 break;
             case CombatState.PARRYING:
+                if(parryData != null) {
+                    float normalizedTime = parryTimer / (parryData.activeTime+parryData.recoveryTime+parryData.startupTime);
 
-                
+                    if(parryTimer > parryData.startupTime && parryTimer <= parryData.startupTime+parryData.activeTime) {
+                        Debug.Log("Parry Success");
+                        EnemyCombatFSM enemy = data.attacker.GetComponent<EnemyCombatFSM>();
+                        enemy.EnterParryStun(transform, ctx, HitDirectionType.FORWARD);
+                        return;
+                    }
+
+                }
+                ResolveNormalHit(ctx,data);
 
                 break;
             default:
@@ -408,7 +414,8 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         }
         HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
         stunnedSampler.Begin(reaction.hitReactionGraph);
-        stunnedTimer = reaction.hitReactionDuraion + stunnedStateOffset;
+        stunnedTimer = reaction.hitReactionDuraion;
+        stunnedMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         TransitionTo(CombatState.STUNNED);
         if(reaction != null) {

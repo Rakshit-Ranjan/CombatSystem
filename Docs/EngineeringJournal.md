@@ -122,3 +122,31 @@ Keeps numeric health concerns separate from combat-state concerns.
 - UI events
 - death handling
 - healing sources
+
+## 2026-07-04 - Defensive Resolution Pass
+
+### Feature
+Added defender-side dodge/parry branching, enemy parry stun entry, and separated hit reaction lock duration from hit reaction movement timing.
+
+### Problem
+Hit reactions previously used one duration value for both total stun time and reaction movement, and defensive outcomes were not yet branching cleanly inside incoming-hit resolution.
+
+### Alternatives
+- Keep one reaction timer for everything
+- Resolve parry success only on the player and leave enemy reaction external
+- Split reaction timing and let the defender push the attacker into stun on parry success
+
+### Decision
+Use defender-side hit resolution for dodge/parry outcomes, add an explicit enemy `EnterParryStun(...)` path, and author a separate reaction-force timing value in `HitReactionData`.
+
+### Reason
+This keeps the defender authoritative over incoming-hit outcomes while allowing hit reaction movement to end before the full stun lock does.
+
+### Tradeoffs
+- `HitReactionData` authoring is now easier to misconfigure
+- Parry behavior still needs more polish and validation coverage
+
+### Future Improvements
+- Add gizmos or debug UI for dodge/parry timing windows
+- Validate reaction timing data in editor/runtime
+- Add direction-aware enemy parry-stun variants
