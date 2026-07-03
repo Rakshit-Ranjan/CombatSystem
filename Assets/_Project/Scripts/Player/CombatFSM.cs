@@ -362,6 +362,39 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             damage = ctx.attackData.damage,
             poiseDamage = ctx.attackData.damage
         };
+
+        switch(currentState) {
+            case CombatState.ATTACKING:
+                break;
+            case CombatState.DODGING:
+                if(dodgeData !=null && dodgeData.duration > 0f) {
+                    float normalizedTime = dodgeTimer / dodgeData.duration;
+                    if(normalizedTime >= dodgeData.iFramesStart && normalizedTime <= dodgeData.iFramesEnd) {
+                        Debug.Log("Dodge Success");
+                        return;
+                    }
+
+
+                }
+
+                ResolveNormalHit(ctx, data);
+
+                break;
+            case CombatState.PARRYING:
+
+                
+
+                break;
+            default:
+                ResolveNormalHit(ctx, data);
+                break;
+        }
+
+        
+    }
+
+    public void ResolveNormalHit(AttackContext ctx, DamageData data) {
+        // print("Got hit by enemy");
         float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
         HitDirectionType directionType;
         if(angleOfAttack >= -45f && angleOfAttack <= 45f) {
@@ -385,7 +418,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             Add angled based hit animation here
             0-180 the enemy is being hit on from its left
             -180-0 the enemy is being hit on from its right
-         */
+        */
         health.TakeDamage(data);
     }
 

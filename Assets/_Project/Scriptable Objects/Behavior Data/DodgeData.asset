@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DodgeData
   duration: 0.5
   dodgeGraph: {fileID: 11400000, guid: ca7b680b97548d64195125c2fced61b9, type: 2}
+  iFramesStart: 0.2
+  iFramesEnd: 0.7
