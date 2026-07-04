@@ -10,6 +10,13 @@ public enum CombatState {
     STUNNED
 }
 
+public enum ParryPhase {
+    NONE,
+    STARTUP,
+    ACTIVE,
+    RECOVERY
+}
+
 
 public class CombatFSM : MonoBehaviour, IAttackReciever {
 
@@ -38,7 +45,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     [SerializeField] private ParryData parryData;
     [SerializeField] private DodgeData dodgeData;
     [SerializeField] private Hitbox weaponHitbox;
-    [SerializeField]private HurtboxReactionMap[] hurtboxReactionMaps;
+    [SerializeField] private HurtboxReactionMap[] hurtboxReactionMaps;
 
     private Vector3 worldDodgeDir;
     private Vector3 localDodgeDir;
@@ -56,12 +63,19 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     public bool IsAttacking => currentState == CombatState.ATTACKING;
     public bool CanRecieveInput => currentState == CombatState.IDLE;
 
+    //Debug Properties
+    public float StateTimer => stateTimer;
+    public float ParryTimer => parryTimer;
+    public float DodgeTimer => dodgeTimer;
+    public float StunnedTimer => stunnedTimer;
+    public float StunnedMovingTimer => stunnedMovingTimer;
+
 
     void Awake() {
         if (animator == null) animator = GetComponent<Animator>();
         if (locomotion == null) locomotion = GetComponent<PlayerLocomotionController>();
         if (inputBuffer == null) inputBuffer = GetComponent<InputBuffer>();
-        if(health == null) health = GetComponent<PlayerHealth>();
+        if (health == null) health = GetComponent<PlayerHealth>();
         attackSampler = new MotionGraphSampler();
         dodgeSampler = new MotionGraphSampler();
         stunnedSampler = new MotionGraphSampler();
@@ -200,7 +214,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         Vector3 worldDelta = DodgeForward * localDelta.z + DodgeRight * localDelta.x + DodgeUp * localDelta.y;
         GetComponent<CharacterController>().Move(worldDelta);
     }
-    
+
     private void HandleParryInput() {
 
 
@@ -234,13 +248,13 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private void HandleStunnedState() {
-        float normalizedTime = stateTimer/(stunnedMovingTimer);
+        float normalizedTime = stateTimer / (stunnedMovingTimer);
         (Vector3 localDelta, float deltaYaw) = stunnedSampler.Sample(normalizedTime);
         Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
         locomotion.ApplyAttackMovement(worldDelta);
         locomotion.LockMovement();
-        
-        if(stateTimer >= stunnedTimer) {
+
+        if (stateTimer >= stunnedTimer) {
             stunnedSampler.Reset();
             locomotion.UnlockMovement();
             TransitionTo(CombatState.IDLE);
@@ -363,13 +377,13 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             poiseDamage = ctx.attackData.damage
         };
 
-        switch(currentState) {
+        switch (currentState) {
             case CombatState.ATTACKING:
                 break;
             case CombatState.DODGING:
-                if(dodgeData !=null && dodgeData.duration > 0f) {
+                if (dodgeData != null && dodgeData.duration > 0f) {
                     float normalizedTime = dodgeTimer / dodgeData.duration;
-                    if(normalizedTime >= dodgeData.iFramesStart && normalizedTime <= dodgeData.iFramesEnd) {
+                    if (normalizedTime >= dodgeData.iFramesStart && normalizedTime <= dodgeData.iFramesEnd) {
                         Debug.Log("Dodge Success");
                         return;
                     }
@@ -377,10 +391,10 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                 ResolveNormalHit(ctx, data);
                 break;
             case CombatState.PARRYING:
-                if(parryData != null) {
-                    float normalizedTime = parryTimer / (parryData.activeTime+parryData.recoveryTime+parryData.startupTime);
+                if (parryData != null) {
+                    float normalizedTime = parryTimer / (parryData.activeTime + parryData.recoveryTime + parryData.startupTime);
 
-                    if(parryTimer > parryData.startupTime && parryTimer <= parryData.startupTime+parryData.activeTime) {
+                    if (parryTimer > parryData.startupTime && parryTimer <= parryData.startupTime + parryData.activeTime) {
                         Debug.Log("Parry Success");
                         EnemyCombatFSM enemy = data.attacker.GetComponent<EnemyCombatFSM>();
                         enemy.EnterParryStun(transform, ctx, HitDirectionType.FORWARD);
@@ -388,7 +402,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                     }
 
                 }
-                ResolveNormalHit(ctx,data);
+                ResolveNormalHit(ctx, data);
 
                 break;
             default:
@@ -396,20 +410,23 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                 break;
         }
 
-        
+
     }
 
     public void ResolveNormalHit(AttackContext ctx, DamageData data) {
         // print("Got hit by enemy");
         float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
         HitDirectionType directionType;
-        if(angleOfAttack >= -45f && angleOfAttack <= 45f) {
+        if (angleOfAttack >= -45f && angleOfAttack <= 45f) {
             directionType = HitDirectionType.BACK;
-        } else if(angleOfAttack > 45 && angleOfAttack <= 135f) {
+        }
+        else if (angleOfAttack > 45 && angleOfAttack <= 135f) {
             directionType = HitDirectionType.LEFT;
-        } else if(angleOfAttack >= -135f && angleOfAttack < -45f) {
+        }
+        else if (angleOfAttack >= -135f && angleOfAttack < -45f) {
             directionType = HitDirectionType.RIGHT;
-        } else {
+        }
+        else {
             directionType = HitDirectionType.FORWARD;
         }
         HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
@@ -418,7 +435,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         stunnedMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         TransitionTo(CombatState.STUNNED);
-        if(reaction != null) {
+        if (reaction != null) {
             PlayHitReaction(reaction);
         }
         /*
@@ -434,10 +451,10 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
-        
-        foreach(var map in hurtboxReactionMaps) {
-            
-            if(map.hurtboxType == type && map.hitDirectionType == directionType)
+
+        foreach (var map in hurtboxReactionMaps) {
+
+            if (map.hurtboxType == type && map.hitDirectionType == directionType)
                 return map.data;
 
         }
@@ -445,5 +462,36 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         return hurtboxReactionMaps[0].data;
 
     }
+
+    // DEBUG methods
+
+    public bool IsDodgeIFramesActive {
+        get {
+            if (currentState != CombatState.DODGING || dodgeData == null || dodgeData.duration <= 0f)
+                return false;
+
+            float normalizedTime = dodgeTimer / dodgeData.duration;
+            return normalizedTime >= dodgeData.iFramesStart && normalizedTime <= dodgeData.iFramesEnd;
+        }
+    }
+
+    public ParryPhase CurrentParryPhase {
+        get {
+            if (currentState != CombatState.PARRYING || parryData == null)
+                return ParryPhase.NONE;
+
+            if (parryTimer < parryData.startupTime)
+                return ParryPhase.STARTUP;
+
+            if (parryTimer <= parryData.startupTime + parryData.activeTime)
+                return ParryPhase.ACTIVE;
+
+            if (parryTimer <= parryData.startupTime + parryData.activeTime + parryData.recoveryTime)
+                return ParryPhase.RECOVERY;
+
+            return ParryPhase.NONE;
+        }
+    }
+
 
 }

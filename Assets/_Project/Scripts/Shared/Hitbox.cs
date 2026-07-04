@@ -14,6 +14,11 @@ public class Hitbox: MonoBehaviour {
 
     private HashSet<IAttackReciever> hitTargets = new();
 
+    public bool IsActive => hitboxCollider != null && hitboxCollider.enabled;
+    public Transform Owner => owner;
+    public AttackData CurrentAttack => currentAttack;
+    public int HitTargetCount => hitTargets.Count;
+
     void Awake() {
         hitboxCollider = GetComponent<Collider>();
         hitboxCollider.isTrigger = true;

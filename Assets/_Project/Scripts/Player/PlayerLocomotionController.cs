@@ -244,7 +244,7 @@ public class PlayerLocomotionController : MonoBehaviour {
             return (worldMoveDir, localMoveDir);
         }
         else {
-            return (Vector3.zero, Vector3.zero);
+            return (-transform.forward , transform.InverseTransformDirection(-transform.forward));
         }
     }
 
@@ -253,9 +253,4 @@ public class PlayerLocomotionController : MonoBehaviour {
     }
 
 
-}
-
-
-public enum DODGE_DIRECTION {
-    FORWARD, BACK, LEFT, RIGHT
 }

@@ -25,6 +25,15 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private Vector3 HitForward, HitRight, HitUp;
     public bool BlocksLocomotion;
 
+    //DEBUG PROPERTIES
+    public CombatState CurrentState => combatState;
+    public float StateTimer => stateTimer;
+    public float StunnedStateTimer => stunnedStateTimer;
+    public float StunnedStateMovingTimer => stunnedStateMovingTimer;
+    public float AttackTimer => attackTimer;
+    public bool IsBlockingLocomotion => BlocksLocomotion;
+
+
     void Awake() {
         health = GetComponent<EnemyHealth>();
         animator = GetComponent<Animator>();
