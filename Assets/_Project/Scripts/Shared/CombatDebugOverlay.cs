@@ -10,14 +10,21 @@ public class CombatDebugOverlay : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
-    [SerializeField] private KeyCode toggleKey = KeyCode.F3;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(toggleKey))
-        {
-            showDebug = !showDebug;
-        }
+    public InputSystem_Actions inputActions;
+
+    void Awake() {
+        inputActions = new InputSystem_Actions();
+    }
+
+    void OnEnable() {
+        inputActions.UI.Enable();
+        inputActions.UI.Debug.performed += ctx => showDebug = !showDebug;
+    }
+
+    void OnDisable() {
+        inputActions.UI.Disable();
+        inputActions.UI.Debug.performed -= ctx => showDebug = !showDebug;
     }
 
     private void OnGUI()
@@ -25,7 +32,7 @@ public class CombatDebugOverlay : MonoBehaviour
         if (!showDebug)
             return;
 
-        GUILayout.BeginArea(new Rect(20f, 20f, 380f, 360f), GUI.skin.box);
+        GUILayout.BeginArea(new Rect(20f, 20f, 380f, 720f), GUI.skin.box);
 
         GUILayout.Label("PLAYER");
         if (playerCombat != null)
@@ -68,6 +75,7 @@ public class CombatDebugOverlay : MonoBehaviour
             GUILayout.Label($"Stunned Timer: {enemyCombat.StunnedStateTimer:F2}");
             GUILayout.Label($"Stunned Move Timer: {enemyCombat.StunnedStateMovingTimer:F2}");
             GUILayout.Label($"Blocks Locomotion: {enemyCombat.IsBlockingLocomotion}");
+            GUILayout.Label($"Combo Index: {enemyCombat.ComboIndex}");
         }
         else
         {

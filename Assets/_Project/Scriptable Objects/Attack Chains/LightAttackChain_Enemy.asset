@@ -15,7 +15,8 @@ MonoBehaviour:
   ChainName: LightAttackChain
   Description: 
   Attacks:
-  - {fileID: 11400000, guid: 03e4722b617803a4789253f47cf0d372, type: 2}
+  - {fileID: 11400000, guid: c7328058de688da4e882f00ddeaf8e2e, type: 2}
+  - {fileID: 11400000, guid: 42ef558489890224296b5e1337cb6145, type: 2}
   minStamina: 0
   requireGrounded: 1
   requireCombatStance: 1

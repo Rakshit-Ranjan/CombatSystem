@@ -33,6 +33,13 @@ public class AttackChain : ScriptableObject {
         return null;
     }
 
+    public AttackData GetNextAttack_Enemy(int currentIndex) {
+        if (currentIndex >= 0 && currentIndex < Attacks.Length - 1) {
+            return Attacks[currentIndex + 1];
+        }
+        return null;
+    }
+
     public AttackData GetRandomAttack() => Attacks[Random.Range(0,Attacks.Length)];
 
 }

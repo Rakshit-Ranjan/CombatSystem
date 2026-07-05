@@ -1,21 +1,24 @@
 using System;
+using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
 
 
 public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
-    
-    [SerializeField]private EnemyBrain brain;
-    [SerializeField]private EnemyController enemyController;
-    [SerializeField]private EnemyHealth health;
-    [SerializeField]private EnemyLocomotion locomotion;
-    [SerializeField]private HurtboxReactionMap[] hurtboxReactionMaps;
-    [SerializeField]private CombatState combatState;
-    [SerializeField]private float stateTimer, stunnedStateTimer, stunnedStateMovingTimer; //stunned state moving timer dictates how long the player moves in the stunned state and is calculated using hitreaction.hitreactionforce
-    [SerializeField]private float timeBetweenAttack, attackTimer, attackFacingThreshold; // every n seconds do an attack
+
+    [SerializeField] private EnemyBrain brain;
+    [SerializeField] private EnemyController enemyController;
+    [SerializeField] private EnemyHealth health;
+    [SerializeField] private EnemyLocomotion locomotion;
+    [SerializeField] private HurtboxReactionMap[] hurtboxReactionMaps;
+    [SerializeField] private CombatState combatState;
+    [SerializeField] private float stateTimer, stunnedStateTimer, stunnedStateMovingTimer; //stunned state moving timer dictates how long the player moves in the stunned state and is calculated using hitreaction.hitreactionforce
+    [SerializeField] private float timeBetweenAttack, attackTimer, attackFacingThreshold; // every n seconds do an attack
     //ATTACK STATE VARIABLES
     [SerializeField] private AttackData currentAttack;
-    [SerializeField]private AttackChain lightAttackChain;
+    [SerializeField] private AttackChain lightAttackChain;
+    [SerializeField] private int comboIndex;
+    [SerializeField] private bool hasQueuedCombo;
     [SerializeField] private Hitbox weaponHitbox;
 
     private CharacterController controller;
@@ -32,6 +35,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     public float StunnedStateMovingTimer => stunnedStateMovingTimer;
     public float AttackTimer => attackTimer;
     public bool IsBlockingLocomotion => BlocksLocomotion;
+    public int ComboIndex => comboIndex;
 
 
     void Awake() {
@@ -50,9 +54,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     void Update() {
         BlocksLocomotion = combatState == CombatState.STUNNED || combatState == CombatState.ATTACKING || combatState == CombatState.WINDUP;
         stateTimer += Time.deltaTime;
-        if(attackTimer > 0) 
+        if (attackTimer > 0)
             attackTimer -= Time.deltaTime;
-        switch(combatState) {
+        switch (combatState) {
             case CombatState.IDLE:
                 HandleIdleState();
                 break;
@@ -75,14 +79,14 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private void HandleIdleState() {
         //first check if enemy intent is in attack
         //attack every 3 seconds
-        if(attackTimer <= 0f && brain.CurrentIntent == EnemyIntent.ATTACK) {
+        if (attackTimer <= 0f && brain.CurrentIntent == EnemyIntent.ATTACK) {
             TransitionTo(CombatState.WINDUP);
         }
     }
 
     private void HandleWindupState() {
         //ABORTING ATTACK
-        if(brain.CurrentIntent != EnemyIntent.ATTACK) {
+        if (brain.CurrentIntent != EnemyIntent.ATTACK) {
             BlocksLocomotion = false;
             TransitionTo(CombatState.IDLE);
             return;
@@ -90,17 +94,20 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         //ROTATE TOWARDS PLAYER
         Vector3 toPlayer = enemyController.playerT.position - transform.position;
         toPlayer.y = 0;
-        if(toPlayer.magnitude < 0.001f) return;
+        if (toPlayer.magnitude < 0.001f) return;
         Quaternion lookRotation = Quaternion.LookRotation(toPlayer.normalized);
         transform.rotation = Quaternion.Slerp(
-            transform.rotation, 
+            transform.rotation,
             lookRotation,
             locomotion.rotationSpeed * Time.deltaTime
         );
 
 
         //STARTING ATTACK
-        if(Vector3.Angle(transform.forward, toPlayer.normalized) < attackFacingThreshold) {
+        if (Vector3.Angle(transform.forward, toPlayer.normalized) < attackFacingThreshold) {
+            if (currentAttack == null) {
+                currentAttack = lightAttackChain.GetStarterAttack();
+            }
             StartAttack();
         }
 
@@ -108,36 +115,43 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     private void HandleAttackingState() {
 
-        if(currentAttack == null) {
+        if (currentAttack == null) {
             TransitionTo(CombatState.IDLE);
             return;
         }
 
-        float normalizedTime = stateTimer/(currentAttack.GetDuration());
+        float normalizedTime = stateTimer / (currentAttack.GetDuration());
         (Vector3 localDelta, float deltaYaw) = attackSampler.Sample(normalizedTime);
         transform.Rotate(0f, deltaYaw, 0f);
-        Vector3 worldDelta = transform.forward * localDelta.z + 
-                             transform.right * localDelta.x + 
+        Vector3 worldDelta = transform.forward * localDelta.z +
+                             transform.right * localDelta.x +
                              transform.up * localDelta.y;
         controller.Move(worldDelta);
 
-        if(stateTimer > currentAttack.GetDuration()) {
-            attackTimer = timeBetweenAttack;
-            attackSampler.Reset();
-            currentAttack = null;
-            BlocksLocomotion = false;
-            TransitionTo(CombatState.IDLE);
+        if (stateTimer > currentAttack.GetDuration()) {
+
+            if (hasQueuedCombo) {
+                ContinueCombo();
+            }
+            else {
+                comboIndex = 0;
+                attackTimer = timeBetweenAttack;
+                attackSampler.Reset();
+                currentAttack = null;
+                BlocksLocomotion = false;
+                TransitionTo(CombatState.IDLE);
+            }
         }
 
     }
 
     private void HandleStunnedState() {
-        float normalizedTime = stateTimer/(stunnedStateMovingTimer);
+        float normalizedTime = stateTimer / (stunnedStateMovingTimer);
         (Vector3 localDelta, float deltaYaw) = stunnedSampler.Sample(normalizedTime);
         Vector3 worldDelta = HitForward * localDelta.z + HitRight * localDelta.x + HitUp * localDelta.y;
         controller.Move(worldDelta);
-        
-        if(stateTimer >= stunnedStateTimer) {
+
+        if (stateTimer >= stunnedStateTimer) {
             stunnedSampler.Reset();
             TransitionTo(CombatState.IDLE);
         }
@@ -161,13 +175,16 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         };
         float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
         HitDirectionType directionType;
-        if(angleOfAttack >= -45f && angleOfAttack <= 45f) {
+        if (angleOfAttack >= -45f && angleOfAttack <= 45f) {
             directionType = HitDirectionType.BACK;
-        } else if(angleOfAttack > 45 && angleOfAttack <= 135f) {
+        }
+        else if (angleOfAttack > 45 && angleOfAttack <= 135f) {
             directionType = HitDirectionType.LEFT;
-        } else if(angleOfAttack >= -135f && angleOfAttack < -45f) {
+        }
+        else if (angleOfAttack >= -135f && angleOfAttack < -45f) {
             directionType = HitDirectionType.RIGHT;
-        } else {
+        }
+        else {
             directionType = HitDirectionType.FORWARD;
         }
         HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
@@ -175,8 +192,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         stunnedStateTimer = reaction.hitReactionDuraion;
         stunnedStateMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
+        attackTimer = timeBetweenAttack;
         TransitionTo(CombatState.STUNNED);
-        if(reaction != null) {
+        if (reaction != null) {
             PlayHitReaction(reaction);
         }
         /*
@@ -187,21 +205,38 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         health.TakeDamage(data);
     }
 
+    private void ContinueCombo() {
+        if (currentAttack == null || currentAttack.motionGraph == null) {
+            TransitionTo(CombatState.IDLE);
+            return;
+        }
+
+        AttackData nextAttack = lightAttackChain?.GetNextAttack(comboIndex);
+        comboIndex++;
+        if (nextAttack == null) {
+            TransitionTo(CombatState.IDLE);
+            return;
+        }
+
+        currentAttack = nextAttack;
+        TransitionTo(CombatState.WINDUP);
+    }
+
     public void PlayHitReaction(HitReactionData data) {
         animator.Play(data.clip.name);
     }
 
     public void StartAttack() {
-        if(lightAttackChain == null || lightAttackChain.Attacks.Length <= 0) return;
+        if (currentAttack == null) return;
 
-        currentAttack = lightAttackChain.GetRandomAttack();
-        if(currentAttack.attackClip != null) {
+        if (currentAttack.attackClip != null) {
             animator.Play(currentAttack.attackName);
         }
         if (currentAttack.motionGraph != null) {
             attackSampler.Begin(currentAttack.motionGraph);
         }
         weaponHitbox.SetAttackData(currentAttack);
+        hasQueuedCombo = lightAttackChain.GetNextAttack_Enemy(comboIndex) != null;
         TransitionTo(CombatState.ATTACKING);
     }
 
@@ -209,7 +244,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         print("Enter Stunned state");
         weaponHitbox.DisableHitbox();
         attackSampler.Reset();
-        currentAttack= null;
+        currentAttack = null;
         Vector3 stunDir = (transform.position - source.position).normalized;
         stunDir.y = 0f;
 
@@ -228,16 +263,18 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     public void EnableWeaponHitbox() {
         weaponHitbox.EnableHitbox();
     }
-    
+
     public void DisableWeaponHitbox() {
         weaponHitbox.DisableHitbox();
     }
-   
+
+
+
     private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
-        
-        foreach(var map in hurtboxReactionMaps) {
-            
-            if(map.hurtboxType == type && map.hitDirectionType == directionType)
+
+        foreach (var map in hurtboxReactionMaps) {
+
+            if (map.hurtboxType == type && map.hitDirectionType == directionType)
                 return map.data;
 
         }
