@@ -219,7 +219,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
 
         currentAttack = nextAttack;
-        TransitionTo(CombatState.WINDUP);
+        TransitionTo(CombatState.ATTACKING);
     }
 
     public void PlayHitReaction(HitReactionData data) {
