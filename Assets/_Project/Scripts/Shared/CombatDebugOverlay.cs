@@ -10,23 +10,22 @@ public class CombatDebugOverlay : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
-
-    public InputSystem_Actions inputActions;
+    private InputSystem_Actions inputActions;
+    [SerializeField] private KeyCode toggleKey = KeyCode.F3;
 
     void Awake() {
         inputActions = new InputSystem_Actions();
     }
 
     void OnEnable() {
-        inputActions.UI.Enable();
+        inputActions.Enable();
         inputActions.UI.Debug.performed += ctx => showDebug = !showDebug;
     }
 
     void OnDisable() {
-        inputActions.UI.Disable();
+        inputActions.Disable();
         inputActions.UI.Debug.performed -= ctx => showDebug = !showDebug;
     }
-
     private void OnGUI()
     {
         if (!showDebug)

@@ -721,7 +721,7 @@
                 {
                     "name": "Debug",
                     "type": "Button",
-                    "id": "779e04c5-5ad8-47a3-ab3c-d6fa72c8f483",
+                    "id": "5779b477-3895-4f33-a483-b8e7a9744167",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1149,7 +1149,7 @@
                 },
                 {
                     "name": "",
-                    "id": "0675e552-b111-456e-be76-a2b379c540a5",
+                    "id": "f801bb7a-6ade-40c5-bf8d-de00cf8e2952",
                     "path": "",
                     "interactions": "",
                     "processors": "",
@@ -1160,7 +1160,7 @@
                 },
                 {
                     "name": "",
-                    "id": "7f8d6df9-56b1-47be-b62b-4d760aad880e",
+                    "id": "b2eeb517-6cf8-4059-9f8a-ab54acb43d8f",
                     "path": "<Keyboard>/backslash",
                     "interactions": "",
                     "processors": "",

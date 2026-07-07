@@ -328,14 +328,13 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             TransitionToIdle();
             return;
         }
-        /** get combo displacement accumulation (OLD CODE NO NEED OF NOW)
-        // float lastAttackDistance =
-        // currentAttack.motionGraph.forward.Evaluate(1f) *
-        // currentAttack.motionGraph.distanceMultiplier;
-        // Vector3 comboTransitionDelta = transform.forward * lastAttackDistance;
-        // // Apply it ONCE
-        // GetComponent<CharacterController>().Move(comboTransitionDelta);
-         **/
+        // get combo displacement accumulation
+        float lastAttackDistance =
+        currentAttack.motionGraph.forward.Evaluate(1f) *
+        currentAttack.motionGraph.distanceMultiplier;
+        Vector3 comboTransitionDelta = transform.forward * lastAttackDistance;
+        // Apply it ONCE
+        GetComponent<CharacterController>().Move(comboTransitionDelta);
 
         currentAttack = nextAttack;
         hasQueuedCombo = false;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LightAttack02_E
   m_EditorClassIdentifier: 
   attackName: LightAttack02
-  attackClip: {fileID: 7400000, guid: 05ce2a06ef9640b45862ba01752a5d95, type: 2}
+  attackClip: {fileID: 7400000, guid: ddb0c4c7d2ee65543addcddf5bca3889, type: 2}
   motionGraph: {fileID: 11400000, guid: dcae9268711ec7e4cbf7e27ffcf02d6e, type: 2}
   movementCurve:
     serializedVersion: 2

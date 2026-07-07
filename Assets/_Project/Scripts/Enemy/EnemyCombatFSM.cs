@@ -134,11 +134,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
                 ContinueCombo();
             }
             else {
-                comboIndex = 0;
-                attackTimer = timeBetweenAttack;
-                attackSampler.Reset();
-                currentAttack = null;
-                BlocksLocomotion = false;
+                ResetAttackState();
                 TransitionTo(CombatState.IDLE);
             }
         }
@@ -162,11 +158,6 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         combatState = state;
     }
 
-    /// <summary>
-    /// handling incoming attacks
-    /// create dmgdata --> hitrxtdata
-    /// </summary>
-    /// <param name="ctx"></param>
     public void OnIncomingAttack(AttackContext ctx) {
         DamageData data = new DamageData {
             attacker = ctx.attacker,
@@ -192,16 +183,11 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         stunnedStateTimer = reaction.hitReactionDuraion;
         stunnedStateMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
-        attackTimer = timeBetweenAttack;
+        ResetAttackState();
         TransitionTo(CombatState.STUNNED);
         if (reaction != null) {
             PlayHitReaction(reaction);
         }
-        /*
-            Add angled based hit animation here
-            0-180 the enemy is being hit on from its left
-            -180-0 the enemy is being hit on from its right
-         */
         health.TakeDamage(data);
     }
 
@@ -214,11 +200,13 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         AttackData nextAttack = lightAttackChain?.GetNextAttack(comboIndex);
         comboIndex++;
         if (nextAttack == null) {
+            ResetAttackState();
             TransitionTo(CombatState.IDLE);
             return;
         }
 
         currentAttack = nextAttack;
+        StartAttack();
         TransitionTo(CombatState.ATTACKING);
     }
 
@@ -268,7 +256,19 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         weaponHitbox.DisableHitbox();
     }
 
+    private void ResetAttackState() {
+        weaponHitbox.DisableHitbox();
+        weaponHitbox.SetAttackData(null);
 
+        attackSampler.Reset();
+
+        currentAttack = null;
+        comboIndex = 0;
+        hasQueuedCombo = false;
+
+        attackTimer = timeBetweenAttack;
+        BlocksLocomotion = false;
+    }
 
     private HitReactionData GetHitReaction(HurtboxType type, HitDirectionType directionType) {
 
