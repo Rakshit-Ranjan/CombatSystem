@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +13,6 @@ public class EnemyLocomotion : MonoBehaviour {
     [SerializeField] private Animator animator;
 
     [Header("Settings")]
-    public Transform player;
     public float moveSpeed;
     public float rotationSpeed;
     public float gravityY;
@@ -21,7 +21,7 @@ public class EnemyLocomotion : MonoBehaviour {
     void Awake() {
         agent = GetComponent<NavMeshAgent>();
         controller = GetComponent<CharacterController>();
-        player = FindAnyObjectByType<PlayerLocomotionController>().transform;
+        animator = GetComponent<Animator>();
     }
 
     void Start() {
@@ -36,6 +36,7 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void Stop() {
         agent.ResetPath();
+        animator.SetFloat("Speed", 0f, 0.05f, Time.deltaTime);
     }
 
     public void SetTarget(Transform t) {
@@ -50,11 +51,16 @@ public class EnemyLocomotion : MonoBehaviour {
     }
 
     public void HandleLocomotion() {
-        if(agent.desiredVelocity.magnitude > 0.01f) {
+        float desiredVelocity = agent.desiredVelocity.magnitude;
+
+        if(desiredVelocity > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
         }
+        float normalizedSpeed = Mathf.Clamp01(desiredVelocity / moveSpeed);
+        animator.SetFloat("Speed", normalizedSpeed, 0.05f, Time.deltaTime);
     }
+
 
 }
