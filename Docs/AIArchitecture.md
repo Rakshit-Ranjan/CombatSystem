@@ -1,12 +1,13 @@
 # AI Architecture
 
 ## Overview
-Enemy AI is intentionally split into four layers:
+Enemy AI is intentionally split into five layers:
 
 1. `EnemyPerception`
 2. `EnemyBrain`
 3. `EnemyController`
-4. `EnemyLocomotion` / `EnemyCombatFSM`
+4. `CombatDirector`
+5. `EnemyLocomotion` / `EnemyCombatFSM`
 
 This keeps sensing, decision-making, orchestration, and execution separate.
 
@@ -52,7 +53,14 @@ Intent values:
 Responsibilities:
 - decide whether locomotion or combat currently owns execution
 - route brain intent into movement or stop behavior
+- check shared attack permission through `CombatDirector`
 - suppress locomotion when combat has control
+
+### `CombatDirector`
+Responsibilities:
+- coordinate shared attack permission across multiple enemies
+- track registered enemies
+- limit how many enemies may actively attack at once
 
 ### `EnemyLocomotion`
 Responsibilities:
@@ -136,5 +144,6 @@ flowchart TD
 ## Current Architecture Notes
 - Current AI is simple and deterministic by design.
 - `EnemyCombatFSM` now also acts as the entry point for parry-induced enemy stun, while `EnemyController` remains unaware of that low-level combat reaction.
+- `CombatDirector` currently provides first-pass single-attacker coordination only; denied attackers do not reposition yet.
 - The system is prepared for richer `EnemyBrain` logic later, such as utility AI, attack selection policies, circling, or coordination.
 - The existing split is the correct foundation for those upgrades.

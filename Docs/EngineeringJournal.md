@@ -150,3 +150,14 @@ This keeps the defender authoritative over incoming-hit outcomes while allowing 
 - Add gizmos or debug UI for dodge/parry timing windows
 - Validate reaction timing data in editor/runtime
 - Add direction-aware enemy parry-stun variants
+
+## 2026-07-09 - Combat Director Pass
+
+### Feature
+Added a first-pass `CombatDirector` singleton to gate concurrent enemy attacks in multi-enemy encounters.
+
+### Decision
+Keep group attack permission outside `EnemyCombatFSM` and use the director as the shared coordination layer.
+
+### Current Limitation
+Denied attackers currently stop rather than reposition or circle.

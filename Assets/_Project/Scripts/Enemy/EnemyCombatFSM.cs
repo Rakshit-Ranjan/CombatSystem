@@ -79,8 +79,11 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private void HandleIdleState() {
         //first check if enemy intent is in attack
         //attack every 3 seconds
-        if (attackTimer <= 0f && brain.CurrentIntent == EnemyIntent.ATTACK) {
-            TransitionTo(CombatState.WINDUP);
+        if (brain.CurrentIntent == EnemyIntent.ATTACK) {
+            if (attackTimer <= 0f && CombatDirector.Instance.CanAttack(enemyController)) {
+                CombatDirector.Instance.NotifyAttackStarted(enemyController);
+                TransitionTo(CombatState.WINDUP);
+            }
         }
     }
 
@@ -88,6 +91,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         //ABORTING ATTACK
         if (brain.CurrentIntent != EnemyIntent.ATTACK) {
             BlocksLocomotion = false;
+            CombatDirector.Instance.NotifyAttackEnded(enemyController);
             TransitionTo(CombatState.IDLE);
             return;
         }
@@ -135,6 +139,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             }
             else {
                 ResetAttackState();
+                CombatDirector.Instance.NotifyAttackEnded(enemyController);
                 TransitionTo(CombatState.IDLE);
             }
         }
@@ -159,6 +164,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     public void OnIncomingAttack(AttackContext ctx) {
+
         DamageData data = new DamageData {
             attacker = ctx.attacker,
             damage = ctx.attackData.damage,
@@ -184,6 +190,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         stunnedStateMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
         ResetAttackState();
+        CombatDirector.Instance.NotifyAttackEnded(enemyController);
         TransitionTo(CombatState.STUNNED);
         if (reaction != null) {
             PlayHitReaction(reaction);
@@ -235,7 +242,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         currentAttack = null;
         Vector3 stunDir = (transform.position - source.position).normalized;
         stunDir.y = 0f;
-
+        CombatDirector.Instance.NotifyAttackEnded(enemyController);
         HitForward = stunDir;
         HitUp = Vector3.up;
         HitRight = Vector3.Cross(Vector3.up, stunDir).normalized;

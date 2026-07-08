@@ -88,6 +88,8 @@ Finish the full 1v1 combat loop with reliable damage, dodge/parry validation, an
 - Player and enemy health both exist as dedicated HP components.
 - Dodge i-frame checking and parry-success branching now exist in the defender-side hit flow.
 - Successful player parries can now push the enemy into a stunned reaction path.
+- A first-pass `CombatDirector` now gates concurrent enemy attacks.
+- Denied attackers currently stop rather than reposition or circle.
 - Defensive damage rules and hitbox dedupe still need hardening.
 
 ## Three-Minute Mental Model

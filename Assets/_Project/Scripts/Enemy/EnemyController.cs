@@ -4,12 +4,12 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyCombatFSM))]
 [RequireComponent(typeof(EnemyLocomotion))]
 public class EnemyController : MonoBehaviour {
-    
+
     [SerializeField]
     private EnemyBrain brain;
-    [SerializeField] 
+    [SerializeField]
     private EnemyCombatFSM combat;
-    [SerializeField] 
+    [SerializeField]
     private EnemyLocomotion locomotion;
 
     public Transform playerT;
@@ -22,16 +22,28 @@ public class EnemyController : MonoBehaviour {
     void Update() {
         HandleStates();
     }
-    
+
+    void OnEnable() {
+        if (CombatDirector.Instance != null) {
+            CombatDirector.Instance.RegisterEnemy(this);
+        }
+    }
+
+    void OnDisable() {
+        if (CombatDirector.Instance != null) {
+            CombatDirector.Instance.UnregisterEnemy(this);
+        }
+    }
+
     private void HandleStates() {
-        
-        if(combat.BlocksLocomotion) {
+
+        if (combat.BlocksLocomotion) {
             locomotion.Stop();
             return;
         }
 
-        switch(brain.CurrentIntent) {
-            
+        switch (brain.CurrentIntent) {
+
             case EnemyIntent.IDLE:
                 locomotion.Stop();
                 break;

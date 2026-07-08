@@ -54,6 +54,7 @@ The architecture is intentionally data-driven for animation-bound gameplay and i
 ### Enemy Stack
 - `EnemyPerception`: senses player visibility and attack range.
 - `EnemyBrain`: converts perception into a coarse intent (`IDLE`, `CHASE`, `ATTACK`).
+- `CombatDirector`: scene-level coordinator that currently limits concurrent enemy attackers.
 - `EnemyController`: bridges AI intent into locomotion or combat ownership.
 - `EnemyLocomotion`: executes movement using `NavMeshAgent` plus `CharacterController`.
 - `EnemyCombatFSM`: owns attack windup, attack execution, stun reactions, parry-stun entry, hitbox setup, and locomotion lock state.
@@ -225,5 +226,6 @@ graph TD
 
 ## Current Architectural Notes
 - Combat is already strongly asset-driven, and recent changes further separated reaction lock time from reaction movement time, but dodge/parry validation and anti-repeat-hit rules are still mid-implementation.
+- Multi-enemy support has started with a first-pass `CombatDirector` attack-token layer; spacing, repositioning, and circling are still future work.
 - Enemy AI is intentionally simple and layered for future expansion.
 - Terrain utilities are currently separate from combat and should stay that way.
