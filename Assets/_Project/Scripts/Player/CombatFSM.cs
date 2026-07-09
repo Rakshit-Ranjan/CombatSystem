@@ -4,6 +4,7 @@ public enum CombatState {
     IDLE,
     WINDUP,
     ATTACKING,
+    CIRCLING,
     BLOCKING,
     DODGING,
     PARRYING,

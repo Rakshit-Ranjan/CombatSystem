@@ -69,6 +69,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             case CombatState.ATTACKING:
                 HandleAttackingState();
                 break;
+            case CombatState.CIRCLING:
+                HandleCirclingState();
+                break;
         }
     }
 
@@ -79,11 +82,18 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private void HandleIdleState() {
         //first check if enemy intent is in attack
         //attack every 3 seconds
-        if (brain.CurrentIntent == EnemyIntent.ATTACK) {
-            if (attackTimer <= 0f && CombatDirector.Instance.CanAttack(enemyController)) {
+        if (brain.CurrentIntent != EnemyIntent.ATTACK) return;
+
+
+        if (CombatDirector.Instance.CanAttack(enemyController)) {
+            if (attackTimer <= 0f) {
                 CombatDirector.Instance.NotifyAttackStarted(enemyController);
                 TransitionTo(CombatState.WINDUP);
             }
+        }
+        else {
+            ResetAttackState();
+            TransitionTo(CombatState.CIRCLING);
         }
     }
 
@@ -156,6 +166,22 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             stunnedSampler.Reset();
             TransitionTo(CombatState.IDLE);
         }
+    }
+
+    private void HandleCirclingState() {
+        if (brain.CurrentIntent != EnemyIntent.ATTACK) {
+            ResetAttackState();
+            TransitionTo(CombatState.IDLE);
+            return;
+        }
+        if (CombatDirector.Instance.CanAttack(enemyController)) {
+            if (attackTimer <= 0f) {
+                CombatDirector.Instance.NotifyAttackStarted(enemyController);
+                TransitionTo(CombatState.WINDUP);
+                return;
+            }
+        }
+
     }
 
     public void TransitionTo(CombatState state) {

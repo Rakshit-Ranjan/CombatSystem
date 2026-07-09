@@ -11,6 +11,7 @@ public class CombatDirector : MonoBehaviour {
 
     public int maxAttackersAtOnce;
     [SerializeField] private int attackers;
+    [SerializeField] private float circlingRadius;
 
     void Awake() {
         if(Instance != null && Instance != this) {
@@ -49,7 +50,17 @@ public class CombatDirector : MonoBehaviour {
             enemies.Remove(enemy);
     }
 
+    public Vector3 GetSlotPosition(EnemyController enemy) {
+        if(enemies == null || enemies.Count == 0) return enemy.playerT.position;
+        
+        int index = enemies.IndexOf(enemy) + 1;
+        float stepAngle = 360f/enemies.Count;
 
+        Vector3 dir = Quaternion.Euler(0, stepAngle * index, 0) * enemy.playerT.forward;
+        Vector3 target = enemy.playerT.position + (dir * circlingRadius);
+        return target;
+
+    }
 
 
 }

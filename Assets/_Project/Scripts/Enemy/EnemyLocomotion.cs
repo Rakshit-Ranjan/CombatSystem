@@ -9,7 +9,9 @@ public class EnemyLocomotion : MonoBehaviour {
     [Header("Components")]
     
     [SerializeField] private NavMeshAgent agent;
-    [SerializeField] private CharacterController controller;
+    [SerializeField] private CharacterController characterController;
+    [SerializeField] private EnemyCombatFSM combat;
+    [SerializeField] private EnemyController enemyController;
     [SerializeField] private Animator animator;
 
     [Header("Settings")]
@@ -20,7 +22,9 @@ public class EnemyLocomotion : MonoBehaviour {
 
     void Awake() {
         agent = GetComponent<NavMeshAgent>();
-        controller = GetComponent<CharacterController>();
+        characterController = GetComponent<CharacterController>();
+        enemyController = GetComponent<EnemyController>();
+        combat = GetComponent<EnemyCombatFSM>();
         animator = GetComponent<Animator>();
     }
 
@@ -30,8 +34,8 @@ public class EnemyLocomotion : MonoBehaviour {
     }
     public void Move(Vector3 direction) {
         
-        controller.Move(moveSpeed * Time.deltaTime * direction.normalized);
-        controller.Move(gravityY * Time.deltaTime * Vector3.up);
+        characterController.Move(moveSpeed * Time.deltaTime * direction.normalized);
+        characterController.Move(gravityY * Time.deltaTime * Vector3.up);
     }
 
     public void Stop() {
@@ -41,6 +45,10 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void SetTarget(Transform t) {
         agent.SetDestination(t.position);
+    }
+
+    public void SetTarget(Vector3 target) {
+        agent.SetDestination(target);
     }
 
     public void FaceDirection(Vector3 direction) {
@@ -61,6 +69,26 @@ public class EnemyLocomotion : MonoBehaviour {
         float normalizedSpeed = Mathf.Clamp01(desiredVelocity / moveSpeed);
         animator.SetFloat("Speed", normalizedSpeed, 0.05f, Time.deltaTime);
     }
+
+    public void HandleLocomotionWhileAttacking() {
+        
+        switch (combat.CurrentState) {
+            
+            case CombatState.ATTACKING:
+                Stop();
+                break;
+
+            case CombatState.CIRCLING:
+                Vector3 targetPos = CombatDirector.Instance.GetSlotPosition(enemyController);
+                
+                SetTarget(targetPos);
+                HandleLocomotion();
+                break;
+
+        }
+
+    }
+
 
 
 }

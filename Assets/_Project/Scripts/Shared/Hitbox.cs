@@ -7,6 +7,7 @@ public class Hitbox: MonoBehaviour {
     
     [Header("Owner")]
     [SerializeField] private Transform owner;
+    [SerializeField] private CombatTeam team;
 
     [Header("Runtime")]
     [SerializeField] private AttackData currentAttack;
@@ -48,6 +49,10 @@ public class Hitbox: MonoBehaviour {
         if(other.transform == owner) return; // dont hit self
 
         Hurtbox hurtbox = other.GetComponent<Hurtbox>();
+        if(hurtbox.team == team) return;
+        if(hurtbox == null) return;
+
+
         IAttackReciever reciever = hurtbox?.GetOwner().GetComponent<IAttackReciever>();
         if(reciever == null) 
             return;
@@ -70,4 +75,8 @@ public class Hitbox: MonoBehaviour {
     }
 
 
+}
+
+public enum CombatTeam {
+    PLAYER, ENEMY
 }

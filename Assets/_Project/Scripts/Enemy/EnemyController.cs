@@ -52,7 +52,7 @@ public class EnemyController : MonoBehaviour {
                 locomotion.HandleLocomotion();
                 break;
             case EnemyIntent.ATTACK:
-                locomotion.Stop();
+                locomotion.HandleLocomotionWhileAttacking();
                 break;
             default:
                 break;
