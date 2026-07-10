@@ -49,8 +49,8 @@ public class Hitbox: MonoBehaviour {
         if(other.transform == owner) return; // dont hit self
 
         Hurtbox hurtbox = other.GetComponent<Hurtbox>();
-        if(hurtbox.team == team) return;
         if(hurtbox == null) return;
+        if(hurtbox.team == team) return;
 
 
         IAttackReciever reciever = hurtbox?.GetOwner().GetComponent<IAttackReciever>();

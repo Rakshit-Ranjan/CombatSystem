@@ -11,7 +11,6 @@ public class CombatDebugOverlay : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
     private InputSystem_Actions inputActions;
-    [SerializeField] private KeyCode toggleKey = KeyCode.F3;
 
     void Awake() {
         inputActions = new InputSystem_Actions();

@@ -93,6 +93,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         }
         else {
             ResetAttackState();
+            CombatDirector.Instance.RefreshSlotBasis(enemyController.playerT);
             TransitionTo(CombatState.CIRCLING);
         }
     }
