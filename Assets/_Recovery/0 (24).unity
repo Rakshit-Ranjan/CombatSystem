@@ -769,7 +769,7 @@ MonoBehaviour:
   enemies: []
   maxAttackersAtOnce: 1
   attackers: 0
-  circlingRadius: 3
+  circlingRadius: 1
 --- !u!4 &289641329
 Transform:
   m_ObjectHideFlags: 0

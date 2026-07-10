@@ -49,11 +49,4 @@ public class EnemyPerception : MonoBehaviour {
     
     }
 
-    void OnDrawGizmos() {
-        Gizmos.color = CanSeePlayer ? Color.lightGreen : Color.indianRed;
-        Gizmos.DrawRay(EnemyEyeTransform.position, (playerTransform.position - transform.position).normalized);
-    }
-
-
-
 }

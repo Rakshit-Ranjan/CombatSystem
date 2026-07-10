@@ -23,10 +23,9 @@ public class EnemyController : MonoBehaviour {
         HandleStates();
     }
 
-    void OnEnable() {
-        if (CombatDirector.Instance != null) {
-            CombatDirector.Instance.RegisterEnemy(this);
-        }
+    void Start() {
+        print("Registering: " + gameObject.name);
+        CombatDirector.Instance.RegisterEnemy(this);
     }
 
     void OnDisable() {
