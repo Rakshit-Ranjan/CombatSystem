@@ -209,6 +209,12 @@ public class PlayerLocomotionController : MonoBehaviour {
         
         controller.Move(worldDelta);
     }
+
+    public void FaceDirection(Vector3 direction) {
+        Quaternion targetRotation = Quaternion.LookRotation(-direction);
+        transform.rotation = targetRotation;
+    }
+
     public void SetCombatMode(bool inCombat) {
         isInCombat = inCombat;
         if (inCombat && isSprinting) {

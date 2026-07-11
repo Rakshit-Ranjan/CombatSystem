@@ -399,6 +399,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                         Debug.Log("Parry Success");
                         EnemyCombatFSM enemy = data.attacker.GetComponent<EnemyCombatFSM>();
                         enemy.EnterParryStun(transform, ctx, HitDirectionType.FORWARD);
+                        Vector3 dir = transform.position - enemy.transform.position;
+                        dir.y = 0;
+                        locomotion.FaceDirection(dir);
                         return;
                     }
 
