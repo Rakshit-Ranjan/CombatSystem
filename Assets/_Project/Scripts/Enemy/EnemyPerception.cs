@@ -7,10 +7,15 @@ public class EnemyPerception : MonoBehaviour {
     public bool CanSeePlayer {get; private set;}
     public float DistToPlayer {get; private set;}
     public bool IsInAttackRange {get; private set;}
+    public bool IsInEngagementRange {get; private set;}
+
 
     public float viewDistance;
 
     public float attackRange;
+
+    public float engagementRadius;
+    public float disengageMentRadius;
 
     public LayerMask viewMask;
 
@@ -35,6 +40,15 @@ public class EnemyPerception : MonoBehaviour {
             CanSeePlayer = false;
             return;
         }
+
+        if(!IsInEngagementRange) {
+            if(DistToPlayer <= engagementRadius) 
+                IsInEngagementRange = true;
+        } else {
+            if(DistToPlayer >= disengageMentRadius)
+                IsInEngagementRange = false;
+        }
+
         Vector3 dir = (playerTransform.position - transform.position).normalized;
         if(Physics.Raycast(new Ray(EnemyEyeTransform.position, dir), out RaycastHit hitInfo, DistToPlayer, viewMask)) {
             PlayerLocomotionController player = hitInfo.collider.GetComponent<PlayerLocomotionController>();

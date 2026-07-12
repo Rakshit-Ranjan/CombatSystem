@@ -80,8 +80,9 @@ public class EnemyLocomotion : MonoBehaviour {
 
             case CombatState.CIRCLING:
                 Vector3 targetPos = CombatDirector.Instance.GetSlotPosition(enemyController);
-                
-                SetTarget(targetPos);
+                float distToTarget = Vector3.Distance(transform.position, targetPos);
+                if(distToTarget > 5f)
+                    SetTarget(targetPos);
                 HandleLocomotion();
                 break;
 

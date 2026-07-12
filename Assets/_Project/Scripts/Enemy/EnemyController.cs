@@ -11,21 +11,26 @@ public class EnemyController : MonoBehaviour {
     private EnemyCombatFSM combat;
     [SerializeField]
     private EnemyLocomotion locomotion;
+    [SerializeField]
+    private EnemyPerception perception;
+
+    public bool IsInCombatGroup { get; private set; }
 
     public Transform playerT;
 
     void Awake() {
-        (brain, combat, locomotion) = (GetComponent<EnemyBrain>(), GetComponent<EnemyCombatFSM>(), GetComponent<EnemyLocomotion>());
+        (brain, combat, locomotion, perception) = (
+                                                GetComponent<EnemyBrain>(),
+                                                GetComponent<EnemyCombatFSM>(),
+                                                GetComponent<EnemyLocomotion>(),
+                                                GetComponent<EnemyPerception>()
+                                                );
         playerT = FindAnyObjectByType<PlayerLocomotionController>().transform;
     }
 
     void Update() {
+        UpdateCombatGroupMembership();
         HandleStates();
-    }
-
-    void Start() {
-        print("Registering: " + gameObject.name);
-        CombatDirector.Instance.RegisterEnemy(this);
     }
 
     void OnDisable() {
@@ -58,6 +63,23 @@ public class EnemyController : MonoBehaviour {
 
         }
 
+    }
+
+    private void UpdateCombatGroupMembership() {
+
+        if (!IsInCombatGroup) {
+            if (perception.CanSeePlayer && perception.IsInEngagementRange) {
+                IsInCombatGroup = true;
+                if(CombatDirector.Instance != null) 
+                    CombatDirector.Instance.RegisterEnemy(this);
+            }
+        } else {
+            if (!perception.CanSeePlayer || !perception.IsInEngagementRange) {
+                IsInCombatGroup = false;
+                if(CombatDirector.Instance != null) 
+                    CombatDirector.Instance.UnregisterEnemy(this);
+            }
+        }
     }
 
 

@@ -6122,6 +6122,7 @@ MonoBehaviour:
   brain: {fileID: 0}
   combat: {fileID: 0}
   locomotion: {fileID: 0}
+  perception: {fileID: 0}
   playerT: {fileID: 0}
 --- !u!114 &2637915135401513677
 MonoBehaviour:
@@ -6172,6 +6173,8 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   viewDistance: 15
   attackRange: 5
+  engagementRadius: 8
+  disengageMentRadius: 10
   viewMask:
     serializedVersion: 2
     m_Bits: 8
