@@ -3,6 +3,18 @@
 ## Goal
 Add support for 2-4 enemies around the player without making combat unreadable or unfair.
 
+## Current Status
+The first playable pass is now in place:
+- `CombatDirector` gates concurrent attackers
+- enemies register through `EnemyController` when they are engaged
+- `EnemyPerception` uses engagement / disengagement radii
+- denied attackers can use assigned ring slots for circling/repositioning
+
+The main remaining problem is polish:
+- avoid awkward reshuffling after attacks
+- tighten slot fairness and refresh timing
+- improve local path resolution when enemies crowd each other
+
 This plan is designed to fit the current architecture:
 - `EnemyPerception` senses the player
 - `EnemyBrain` chooses coarse intent
@@ -70,8 +82,8 @@ This is the most important multi-enemy system.
 Without it, the fight will feel unfair even if movement is working.
 
 ### New system
-Create a scene-level manager, for example:
-- `EnemyCombatDirector`
+Create a scene-level manager:
+- `CombatDirector`
 
 Responsibilities:
 - track active enemies near the player
@@ -225,7 +237,7 @@ The player can read:
 ## Recommended Architecture Changes
 
 ### New files
-- `EnemyCombatDirector.cs`
+- `CombatDirector.cs`
 - optionally `EnemyGroupSlot.cs` or a small helper struct for slot data
 
 ### Existing files to touch
@@ -246,7 +258,7 @@ Do not turn it into a group AI manager.
 
 ## Detailed Responsibilities
 
-### `EnemyCombatDirector`
+### `CombatDirector`
 - owns enemy registration
 - owns attack permission
 - owns slot assignment

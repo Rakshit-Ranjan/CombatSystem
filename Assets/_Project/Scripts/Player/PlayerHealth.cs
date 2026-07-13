@@ -22,7 +22,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable {
         currentHealth -= data.damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        Debug.Log($"Player took {data.damage} damage from {data.attacker?.name}. HP: {currentHealth}/{maxHealth}");
+        // Debug.Log($"Player took {data.damage} damage from {data.attacker?.name}. HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0f) {
             Die();

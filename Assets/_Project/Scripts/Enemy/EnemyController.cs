@@ -30,6 +30,11 @@ public class EnemyController : MonoBehaviour {
 
     void Update() {
         UpdateCombatGroupMembership();
+
+        if(IsInCombatGroup && CombatDirector.Instance != null) {
+            CombatDirector.Instance.TryRefreshSlotBasis(playerT);
+        }
+
         HandleStates();
     }
 

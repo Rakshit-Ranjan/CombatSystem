@@ -159,5 +159,5 @@ Added a first-pass `CombatDirector` singleton to gate concurrent enemy attacks i
 ### Decision
 Keep group attack permission outside `EnemyCombatFSM` and use the director as the shared coordination layer.
 
-### Current Limitation
-Denied attackers currently stop rather than reposition or circle.
+### Follow-up
+Expanded the first pass so engaged enemies register through `EnemyController`, slot assignment lives in `CombatDirector`, circling uses assigned ring targets, and slot-basis refresh is now throttled instead of firing on every denied attack.

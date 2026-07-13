@@ -30,11 +30,13 @@ Responsibilities:
 - measure player distance
 - determine attack-range eligibility
 - determine line-of-sight visibility
+- maintain engagement / disengagement hysteresis for combat-group membership
 
 Outputs:
 - `CanSeePlayer`
 - `DistToPlayer`
 - `IsInAttackRange`
+- `IsInEngagementRange`
 
 ### `EnemyBrain`
 Responsibilities:
@@ -54,6 +56,8 @@ Responsibilities:
 - decide whether locomotion or combat currently owns execution
 - route brain intent into movement or stop behavior
 - check shared attack permission through `CombatDirector`
+- register and unregister the enemy with the combat group
+- request controlled slot-basis refresh while engaged
 - suppress locomotion when combat has control
 
 ### `CombatDirector`
@@ -61,6 +65,9 @@ Responsibilities:
 - coordinate shared attack permission across multiple enemies
 - track registered enemies
 - limit how many enemies may actively attack at once
+- assign and retain circling-slot angles per enemy
+- convert assigned slot angles into world positions around the player
+- refresh slot basis only on guarded timing / yaw conditions
 
 ### `EnemyLocomotion`
 Responsibilities:
@@ -144,6 +151,6 @@ flowchart TD
 ## Current Architecture Notes
 - Current AI is simple and deterministic by design.
 - `EnemyCombatFSM` now also acts as the entry point for parry-induced enemy stun, while `EnemyController` remains unaware of that low-level combat reaction.
-- `CombatDirector` currently provides first-pass single-attacker coordination only; denied attackers do not reposition yet.
-- The system is prepared for richer `EnemyBrain` logic later, such as utility AI, attack selection policies, circling, or coordination.
+- `CombatDirector` now does first-pass single-attacker coordination plus slot ownership for circling enemies; slot refresh is intentionally throttled to avoid reshuffling every attack.
+- The system is prepared for richer `EnemyBrain` logic later, such as utility AI, attack selection policies, and stronger coordination rules.
 - The existing split is the correct foundation for those upgrades.

@@ -15,7 +15,7 @@ public class EnemyPerception : MonoBehaviour {
     public float attackRange;
 
     public float engagementRadius;
-    public float disengageMentRadius;
+    public float disengagementRadius;
 
     public LayerMask viewMask;
 
@@ -45,7 +45,7 @@ public class EnemyPerception : MonoBehaviour {
             if(DistToPlayer <= engagementRadius) 
                 IsInEngagementRange = true;
         } else {
-            if(DistToPlayer >= disengageMentRadius)
+            if(DistToPlayer >= disengagementRadius)
                 IsInEngagementRange = false;
         }
 

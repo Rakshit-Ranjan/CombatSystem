@@ -31,6 +31,7 @@ The project is in active prototype development. Core combat and AI systems are i
 - Enemy perception with view distance, raycast visibility, and attack range checks
 - Enemy brain that converts perception into `IDLE`, `CHASE`, or `ATTACK` intent
 - Enemy controller that routes AI intent into locomotion or combat ownership
+- Combat director that gates concurrent attackers and assigns first-pass circling slots
 - Enemy combat FSM with windup, attack, and stunned states
 - Hybrid `NavMeshAgent` pathfinding with `CharacterController` movement execution
 
@@ -109,7 +110,7 @@ Planned:
 - Full dodge and parry damage validation
 - Perfect parry and perfect dodge rules
 - Block/guard, poise, stagger, and death reactions
-- Enemy circling, attack variety, group AI, and AI director behavior
+- Enemy attack variety, group AI, and multi-enemy polish
 
 ## Installation
 
@@ -130,7 +131,7 @@ Planned:
 ## Future Plans
 
 - Harden defensive combat rules and hit validation
-- Add richer enemy attack selection and circling behavior
+- Add richer enemy attack selection and multi-enemy polish
 - Improve animation polish and combat feedback
 - Expand debug visualization for MotionGraphs, hitboxes, and AI state
 - Add more robust death, stagger, and poise handling

@@ -27,10 +27,11 @@
 - [x] Controller
 - [x] NavMesh locomotion
 - [x] Combat ownership handoff
-- [ ] Circling behavior
+- [x] Director system
+- [x] First-pass circling behavior
 - [ ] Attack selection variety
 - [ ] Group AI
-- [ ] Director system
+- [ ] Slot fairness / anti-reshuffle polish
 
 ## Movement
 - [x] CharacterController player movement

@@ -6094,7 +6094,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 6255359921235779884}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.55
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -6171,10 +6171,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPerception
   playerTransform: {fileID: 0}
-  viewDistance: 15
-  attackRange: 5
-  engagementRadius: 8
-  disengageMentRadius: 10
+  viewDistance: 12
+  attackRange: 2.25
+  engagementRadius: 6
+  disengagementRadius: 7.5
   viewMask:
     serializedVersion: 2
     m_Bits: 8

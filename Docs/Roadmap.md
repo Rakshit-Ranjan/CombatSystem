@@ -25,14 +25,14 @@ Defensive combat validation:
 - parry validation and enemy-side parry stun polish
 - perfect parry / perfect dodge windows
 - stable one-hit-per-swing lifecycle
-- first-pass multi-enemy spacing / circling on top of the current combat director
+- multi-enemy slot fairness and circling polish on top of the current combat director
 
 ## Future Features
 - Enemy combo chains and attack variety
 - Better player death / enemy death handling
 - Block / guard rules
 - Poise / stagger systems
-- More AI behaviors (circling, group behavior, director logic)
+- More AI behaviors (group behavior, director heuristics, better repositioning)
 - Stance or enemy-type-specific combat responses
 
 ## Known Technical Debt

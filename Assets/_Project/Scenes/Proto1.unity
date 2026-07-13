@@ -770,6 +770,12 @@ MonoBehaviour:
   maxAttackersAtOnce: 1
   attackers: 0
   circlingRadius: 3
+  refreshCooldown: 7
+  yawRefreshThreshold: 50
+  focusEnemy: {fileID: 0}
+  focusLockUntilTime: 0
+  stunFocusReleaseDelay: 0
+  maxFocusDistance: 0
 --- !u!4 &289641329
 Transform:
   m_ObjectHideFlags: 0
@@ -3797,15 +3803,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6142337007547435851, guid: d8a26b03f7aaa6c4084f12b8e927be43, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 74.72737
+      value: 74
       objectReference: {fileID: 0}
     - target: {fileID: 6142337007547435851, guid: d8a26b03f7aaa6c4084f12b8e927be43, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0000007848647
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6142337007547435851, guid: d8a26b03f7aaa6c4084f12b8e927be43, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 78.36044
+      value: 78
       objectReference: {fileID: 0}
     - target: {fileID: 6142337007547435851, guid: d8a26b03f7aaa6c4084f12b8e927be43, type: 3}
       propertyPath: m_LocalRotation.w
