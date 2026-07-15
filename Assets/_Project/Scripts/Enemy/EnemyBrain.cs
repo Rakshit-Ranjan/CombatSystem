@@ -24,17 +24,17 @@ public class EnemyBrain : MonoBehaviour {
     }
 
     private void EvaluateIntent() {
-        EnemyIntent newIntent;
+        
         if(!perception.CanSeePlayer) {
-            newIntent = EnemyIntent.IDLE;
-        } else if(perception.IsInAttackRange) {
-            newIntent = EnemyIntent.ATTACK;
-        } else {
-            newIntent = EnemyIntent.CHASE;
+            CurrentIntent = EnemyIntent.IDLE;
+            return;
         }
 
-        if(CurrentIntent != newIntent)
-            CurrentIntent = newIntent;
+        if(!perception.IsInEngagementRange) {
+            CurrentIntent = EnemyIntent.CHASE;
+            return;
+        }
+        CurrentIntent = EnemyIntent.ATTACK;
     }
 
 }

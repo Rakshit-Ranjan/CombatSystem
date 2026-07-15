@@ -10,8 +10,6 @@ public class CombatDirector : MonoBehaviour {
     Dictionary<EnemyController, float> assignedAngles = new();
 
     public static CombatDirector Instance { get; private set; }
-
-    public int maxAttackersAtOnce;
     private Vector3 slotBasisForward = Vector3.forward;
     [SerializeField] private int attackers;
     [SerializeField] private float circlingRadius;
@@ -46,14 +44,6 @@ public class CombatDirector : MonoBehaviour {
         }
 
 
-    }
-
-    public void NotifyAttackStarted(EnemyController enemy) {
-        attackers++;
-    }
-    public void NotifyAttackEnded(EnemyController enemy) {
-        if (attackers <= 0) return;
-        attackers--;
     }
 
     public void RegisterEnemy(EnemyController enemy) {

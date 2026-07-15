@@ -767,6 +767,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatDirector
   enemies: []
+  maxAttackersAtOnce: 1
   attackers: 0
   circlingRadius: 3
   refreshCooldown: 7

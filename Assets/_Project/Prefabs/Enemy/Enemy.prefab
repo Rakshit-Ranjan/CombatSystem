@@ -6174,7 +6174,7 @@ MonoBehaviour:
   viewDistance: 12
   attackRange: 2.25
   engagementRadius: 6
-  disengagementRadius: 7.5
+  disengagementRadius: 10
   viewMask:
     serializedVersion: 2
     m_Bits: 8
