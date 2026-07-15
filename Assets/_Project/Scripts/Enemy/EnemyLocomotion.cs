@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,8 +13,11 @@ public class EnemyLocomotion : MonoBehaviour {
     [SerializeField] private EnemyController enemyController;
     [SerializeField] private Animator animator;
 
+    public float Speed {get; private set;}
+
     [Header("Settings")]
     public float moveSpeed;
+    public float circlingSpeed;
     public float rotationSpeed;
     public float gravityY;
 
@@ -34,7 +36,7 @@ public class EnemyLocomotion : MonoBehaviour {
     }
     public void Move(Vector3 direction) {
         
-        characterController.Move(moveSpeed * Time.deltaTime * direction.normalized);
+        characterController.Move(Speed * Time.deltaTime * direction.normalized);
         characterController.Move(gravityY * Time.deltaTime * Vector3.up);
     }
 
@@ -60,7 +62,7 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void HandleLocomotion() {
         float desiredVelocity = agent.desiredVelocity.magnitude;
-
+        SetVelocity(moveSpeed);
         if(desiredVelocity > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
@@ -71,7 +73,6 @@ public class EnemyLocomotion : MonoBehaviour {
     }
 
     public void HandleLocomotionWhileAttacking() {
-        
         switch (combat.CurrentState) {
             
             case CombatState.ATTACKING:
@@ -87,7 +88,19 @@ public class EnemyLocomotion : MonoBehaviour {
                 break;
 
         }
+        Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity);
+        SetVelocity(circlingSpeed);
+        animator.SetFloat("Horizontal", localVel.x);
+        animator.SetFloat("Vertical", localVel.z);
 
+    }
+
+    public void ToCombatAnimation(bool c) {
+        animator.SetBool("IsInCombat", c);
+    }
+
+    public void SetVelocity(float speed) {
+        Speed = speed;
     }
 
 

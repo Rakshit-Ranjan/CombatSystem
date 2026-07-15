@@ -77,10 +77,12 @@ public class EnemyController : MonoBehaviour {
                 IsInCombatGroup = true;
                 if(CombatDirector.Instance != null) 
                     CombatDirector.Instance.RegisterEnemy(this);
+                locomotion.ToCombatAnimation(true);
             }
         } else {
             if (!perception.CanSeePlayer || !perception.IsInEngagementRange) {
                 IsInCombatGroup = false;
+                locomotion.ToCombatAnimation(false);
                 if(CombatDirector.Instance != null) 
                     CombatDirector.Instance.UnregisterEnemy(this);
             }

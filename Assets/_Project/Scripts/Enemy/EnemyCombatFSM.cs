@@ -171,6 +171,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             TransitionTo(CombatState.IDLE);
             return;
         }
+        Vector3 toPlayer = enemyController.playerT.position - transform.position;
+        
+        locomotion.FaceDirection(toPlayer);
         // if (CombatDirector.Instance.CanAttack(enemyController)) {
         //     if (attackTimer <= 0f) {
         //         CombatDirector.Instance.NotifyAttackStarted(enemyController);

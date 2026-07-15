@@ -6156,6 +6156,7 @@ MonoBehaviour:
   enemyController: {fileID: 0}
   animator: {fileID: 0}
   moveSpeed: 3
+  circlingSpeed: 1.5
   rotationSpeed: 8
   gravityY: -20
 --- !u!114 &3637960870449820443
@@ -6227,7 +6228,7 @@ MonoBehaviour:
   stateTimer: 0
   stunnedStateTimer: 0
   stunnedStateMovingTimer: 0
-  timeBetweenAttack: 4
+  timeBetweenAttack: 2
   attackTimer: 0
   attackFacingThreshold: 5
   currentAttack: {fileID: 0}
