@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -72,7 +73,16 @@ public class EnemyLocomotion : MonoBehaviour {
         animator.SetFloat("Speed", normalizedSpeed, 0.05f, Time.deltaTime);
     }
 
-    public void HandleLocomotionWhileAttacking() {
+    public void MoveToPlayer(Transform t) {
+        SetTarget(t);
+        if(agent.desiredVelocity.magnitude > 0.01f) {
+            Move(agent.desiredVelocity);
+            agent.nextPosition = transform.position;
+            FaceDirection(agent.desiredVelocity);
+        }
+    }
+
+    public void HandleLocomotionWhileEngaged() {
         switch (combat.CurrentState) {
             
             case CombatState.ATTACKING:

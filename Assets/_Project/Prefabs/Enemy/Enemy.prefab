@@ -6156,7 +6156,7 @@ MonoBehaviour:
   enemyController: {fileID: 0}
   animator: {fileID: 0}
   moveSpeed: 3
-  circlingSpeed: 1.5
+  circlingSpeed: 2
   rotationSpeed: 8
   gravityY: -20
 --- !u!114 &3637960870449820443
@@ -6172,10 +6172,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPerception
   playerTransform: {fileID: 0}
-  viewDistance: 12
+  viewDistance: 20
   attackRange: 2.25
   engagementRadius: 6
-  disengagementRadius: 10
+  disengagementRadius: 8
   viewMask:
     serializedVersion: 2
     m_Bits: 8
@@ -6209,6 +6209,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatFSM
   brain: {fileID: 0}
   enemyController: {fileID: 0}
+  perception: {fileID: 0}
   health: {fileID: 0}
   locomotion: {fileID: 0}
   hurtboxReactionMaps:

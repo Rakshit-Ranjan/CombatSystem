@@ -18,6 +18,6 @@ public enum HitDirectionType {
 }
 
 public enum EnemyIntent {
-    IDLE, CHASE, ATTACK
+    IDLE, CHASE, ENGAGE
 } 
 

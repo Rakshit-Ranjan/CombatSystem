@@ -8,6 +8,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     [SerializeField] private EnemyBrain brain;
     [SerializeField] private EnemyController enemyController;
+    [SerializeField] private EnemyPerception perception;
     [SerializeField] private EnemyHealth health;
     [SerializeField] private EnemyLocomotion locomotion;
     [SerializeField] private HurtboxReactionMap[] hurtboxReactionMaps;
@@ -44,6 +45,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         controller = GetComponent<CharacterController>();
         enemyController = GetComponent<EnemyController>();
         locomotion = GetComponent<EnemyLocomotion>();
+        perception = GetComponent<EnemyPerception>();
         brain = GetComponent<EnemyBrain>();
         weaponHitbox = GetComponentInChildren<Hitbox>();
         combatState = CombatState.IDLE;
@@ -82,12 +84,16 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     private void HandleIdleState() {
         //first check if enemy intent is in attack
         //attack every 3 seconds
-        if (brain.CurrentIntent != EnemyIntent.ATTACK) return;
+        if (brain.CurrentIntent != EnemyIntent.ENGAGE) return;
 
 
         if (CombatDirector.Instance.CanAttack(enemyController)) {
-            if (attackTimer <= 0f) {
-                TransitionTo(CombatState.WINDUP);
+            if (perception.IsInAttackRange) {
+                if (attackTimer <= 0f) {
+                    TransitionTo(CombatState.WINDUP);
+                }
+            } else {
+                locomotion.MoveToPlayer(enemyController.playerT);
             }
         }
         else {
@@ -98,7 +104,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     private void HandleWindupState() {
         //ABORTING ATTACK
-        if (brain.CurrentIntent != EnemyIntent.ATTACK) {
+        if (brain.CurrentIntent != EnemyIntent.ENGAGE) {
             BlocksLocomotion = false;
             TransitionTo(CombatState.IDLE);
             return;
@@ -166,13 +172,13 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     private void HandleCirclingState() {
-        if (brain.CurrentIntent != EnemyIntent.ATTACK) {
+        if (brain.CurrentIntent != EnemyIntent.ENGAGE) {
             ResetAttackState();
             TransitionTo(CombatState.IDLE);
             return;
         }
         Vector3 toPlayer = enemyController.playerT.position - transform.position;
-        
+
         locomotion.FaceDirection(toPlayer);
         // if (CombatDirector.Instance.CanAttack(enemyController)) {
         //     if (attackTimer <= 0f) {
@@ -216,10 +222,10 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         stunnedStateMovingTimer = reaction.hitReactionForce;
         (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
 
-        if(!CombatDirector.Instance.HasFocus(enemyController)) {
+        if (!CombatDirector.Instance.HasFocus(enemyController)) {
             CombatDirector.Instance.SetFocusEnemy(enemyController);
         }
-        
+
         ResetAttackState();
         TransitionTo(CombatState.STUNNED);
         if (reaction != null) {

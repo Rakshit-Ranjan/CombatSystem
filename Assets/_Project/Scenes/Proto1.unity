@@ -768,7 +768,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatDirector
   enemies: []
   attackers: 0
-  circlingRadius: 3
+  circlingRadius: 5
   refreshCooldown: 7
   yawRefreshThreshold: 50
   focusEnemy: {fileID: 0}
@@ -2660,7 +2660,7 @@ MonoBehaviour:
   enemyCombat: {fileID: 7165016677602300021}
   playerHitbox: {fileID: 261064214}
   enemyHitbox: {fileID: 8742632648488776164}
-  showDebug: 1
+  showDebug: 0
 --- !u!4 &1399286936
 Transform:
   m_ObjectHideFlags: 0

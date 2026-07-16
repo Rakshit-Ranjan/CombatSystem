@@ -1,10 +1,13 @@
+using Unity.AppUI.Core;
 using UnityEngine;
 
 [RequireComponent(typeof(EnemyPerception))]
 public class EnemyBrain : MonoBehaviour {
 
-    [SerializeField] 
+    [SerializeField]
     private EnemyPerception perception;
+    private EnemyController controller;
+    private CombatDirector director;
     private float evalTimer;
 
     public EnemyIntent CurrentIntent;
@@ -13,28 +16,34 @@ public class EnemyBrain : MonoBehaviour {
 
     void Awake() {
         perception = GetComponent<EnemyPerception>();
+        controller = GetComponent<EnemyController>();
         CurrentIntent = EnemyIntent.IDLE;
+        director = CombatDirector.Instance;
     }
 
     void Update() {
         evalTimer += Time.deltaTime;
-        if(evalTimer < stateEvalInterval ) return;
+        if (evalTimer < stateEvalInterval) return;
         evalTimer = 0f;
         EvaluateIntent();
     }
 
     private void EvaluateIntent() {
-        
-        if(!perception.CanSeePlayer) {
-            CurrentIntent = EnemyIntent.IDLE;
-            return;
+        EnemyIntent newIntent;
+
+        if (!perception.CanSeePlayer) {
+            newIntent = EnemyIntent.IDLE;
+        }
+        else if (!perception.IsInEngagementRange) {
+            newIntent = EnemyIntent.CHASE;
+        }
+        else {
+            newIntent = EnemyIntent.ENGAGE;
         }
 
-        if(!perception.IsInEngagementRange) {
-            CurrentIntent = EnemyIntent.CHASE;
-            return;
+        if (CurrentIntent != newIntent) {
+            CurrentIntent = newIntent;
         }
-        CurrentIntent = EnemyIntent.ATTACK;
     }
 
 }

@@ -60,8 +60,8 @@ public class EnemyController : MonoBehaviour {
                 locomotion.SetTarget(playerT);
                 locomotion.HandleLocomotion();
                 break;
-            case EnemyIntent.ATTACK:
-                locomotion.HandleLocomotionWhileAttacking();
+            case EnemyIntent.ENGAGE:
+                locomotion.HandleLocomotionWhileEngaged();
                 break;
             default:
                 break;

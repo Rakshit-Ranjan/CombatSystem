@@ -67,7 +67,7 @@ public class CombatDebugOverlay : MonoBehaviour
         GUILayout.Label("ENEMY");
         if (enemyCombat != null)
         {
-            GUILayout.Label($"State: {enemyCombat.CurrentState}");
+            GUILayout.Label($"Combat State: {enemyCombat.CurrentState}");
             GUILayout.Label($"State Timer: {enemyCombat.StateTimer:F2}");
             GUILayout.Label($"Attack Cooldown Timer: {enemyCombat.AttackTimer:F2}");
             GUILayout.Label($"Stunned Timer: {enemyCombat.StunnedStateTimer:F2}");
