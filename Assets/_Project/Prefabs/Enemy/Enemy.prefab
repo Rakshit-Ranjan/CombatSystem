@@ -6051,7 +6051,7 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
+  m_Height: 1.8
   m_Radius: 0.3
   m_SlopeLimit: 45
   m_StepOffset: 0.3
@@ -6153,6 +6153,7 @@ MonoBehaviour:
   agent: {fileID: 0}
   characterController: {fileID: 0}
   combat: {fileID: 0}
+  perception: {fileID: 0}
   enemyController: {fileID: 0}
   animator: {fileID: 0}
   moveSpeed: 3
@@ -6172,9 +6173,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPerception
   playerTransform: {fileID: 0}
+  CanSeePlayer: 0
   viewDistance: 20
-  attackRange: 2.25
-  engagementRadius: 6
+  attackRange:
+    min: 2.25
+    max: 3
+  engagementRange: 6
   disengagementRadius: 8
   viewMask:
     serializedVersion: 2

@@ -36,6 +36,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     public float StunnedStateMovingTimer => stunnedStateMovingTimer;
     public float AttackTimer => attackTimer;
     public bool IsBlockingLocomotion => BlocksLocomotion;
+    public bool IsInAttackRange => perception.IsInAttackRange;
     public int ComboIndex => comboIndex;
 
 

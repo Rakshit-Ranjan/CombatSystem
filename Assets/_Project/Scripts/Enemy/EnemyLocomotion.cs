@@ -5,28 +5,36 @@ using UnityEngine.Animations;
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyLocomotion : MonoBehaviour {
-    
+
     [Header("Components")]
-    
+
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private EnemyCombatFSM combat;
+    [SerializeField] private EnemyPerception perception;
     [SerializeField] private EnemyController enemyController;
     [SerializeField] private Animator animator;
 
-    public float Speed {get; private set;}
+    public float Speed { get; private set; }
 
     [Header("Settings")]
     public float moveSpeed;
     public float circlingSpeed;
     public float rotationSpeed;
     public float gravityY;
+    [SerializeField] private float slotArriveDistance = 0.8f;
+    [SerializeField] private float slotAngleArriveThreshold = 8f;
+    [SerializeField] private float radialCorrectionStrength = 0.75f;
+    [SerializeField] private float focusAvoidArc = 40f;
+
+    private Vector3 engagedMoveDirection;
 
 
     void Awake() {
         agent = GetComponent<NavMeshAgent>();
         characterController = GetComponent<CharacterController>();
         enemyController = GetComponent<EnemyController>();
+        perception = GetComponent<EnemyPerception>();
         combat = GetComponent<EnemyCombatFSM>();
         animator = GetComponent<Animator>();
     }
@@ -36,13 +44,14 @@ public class EnemyLocomotion : MonoBehaviour {
         agent.updateRotation = false;
     }
     public void Move(Vector3 direction) {
-        
+
         characterController.Move(Speed * Time.deltaTime * direction.normalized);
         characterController.Move(gravityY * Time.deltaTime * Vector3.up);
     }
 
     public void Stop() {
         agent.ResetPath();
+        engagedMoveDirection = Vector3.zero;
         animator.SetFloat("Speed", 0f, 0.05f, Time.deltaTime);
     }
 
@@ -55,7 +64,10 @@ public class EnemyLocomotion : MonoBehaviour {
     }
 
     public void FaceDirection(Vector3 direction) {
-        
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f)
+            return;
+
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
@@ -64,7 +76,7 @@ public class EnemyLocomotion : MonoBehaviour {
     public void HandleLocomotion() {
         float desiredVelocity = agent.desiredVelocity.magnitude;
         SetVelocity(moveSpeed);
-        if(desiredVelocity > 0.01f) {
+        if (desiredVelocity > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
@@ -75,7 +87,7 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void MoveToPlayer(Transform t) {
         SetTarget(t);
-        if(agent.desiredVelocity.magnitude > 0.01f) {
+        if (agent.desiredVelocity.magnitude > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
@@ -84,21 +96,17 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void HandleLocomotionWhileEngaged() {
         switch (combat.CurrentState) {
-            
+
             case CombatState.ATTACKING:
                 Stop();
                 break;
 
             case CombatState.CIRCLING:
-                Vector3 targetPos = CombatDirector.Instance.GetSlotPosition(enemyController);
-                float distToTarget = Vector3.Distance(transform.position, targetPos);
-                if(distToTarget > 0.6f)
-                    SetTarget(targetPos);
-                HandleLocomotion();
+                OrbitToAssignedSlot();
                 break;
 
         }
-        Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity);
+        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
         SetVelocity(circlingSpeed);
         animator.SetFloat("Horizontal", localVel.x);
         animator.SetFloat("Vertical", localVel.z);
@@ -113,6 +121,117 @@ public class EnemyLocomotion : MonoBehaviour {
         Speed = speed;
     }
 
+    private void OrbitToAssignedSlot() {
+        CombatDirector director = CombatDirector.Instance;
+        Transform player = enemyController.playerT;
 
+        if (director == null || player == null) {
+            Stop();
+            engagedMoveDirection = Vector3.zero;
+            return;
+        }
+
+        if (!director.TryGetAssignedSlotAngle(enemyController, out float targetAngle)) {
+            Stop();
+            engagedMoveDirection = Vector3.zero;
+            return;
+        }
+
+        Vector3 toEnemy = transform.position - player.position;
+        toEnemy.y = 0f;
+
+        if (toEnemy.sqrMagnitude < 0.001f) {
+            toEnemy = -player.forward;
+            toEnemy.y = 0f;
+        }
+
+        Vector3 radialDir = toEnemy.normalized;
+        float currentRadius = toEnemy.magnitude;
+        float currentAngle = NormalizeAngle(Vector3.SignedAngle(director.SlotBasisForward, radialDir, Vector3.up));
+        float angleDelta = Mathf.DeltaAngle(currentAngle, targetAngle);
+        float radiusError = director.CirclingRadius - currentRadius;
+
+        FaceDirection(player.position - transform.position);
+
+        if (Mathf.Abs(angleDelta) <= slotAngleArriveThreshold &&
+            Mathf.Abs(radiusError) <= slotArriveDistance) {
+            Stop();
+            engagedMoveDirection = Vector3.zero;
+            return;
+        }
+
+        float orbitDirection = angleDelta >= 0f ? 1f : -1f;
+        if (WouldCrossFocusLane(currentAngle, targetAngle, orbitDirection, director, player)) {
+            orbitDirection *= -1f;
+        }
+
+        Vector3 clockwiseTangent = Vector3.Cross(Vector3.up, radialDir).normalized;
+        Vector3 counterClockwiseTangent = -clockwiseTangent;
+        Vector3 tangentDir = orbitDirection > 0f ? clockwiseTangent : counterClockwiseTangent;
+        Vector3 radialCorrection = radialDir * radiusError * radialCorrectionStrength;
+        Vector3 moveDirection = tangentDir + radialCorrection;
+
+        if (moveDirection.sqrMagnitude < 0.001f) {
+            moveDirection = tangentDir;
+        }
+
+        agent.ResetPath();
+        SetVelocity(circlingSpeed);
+        engagedMoveDirection = moveDirection.normalized;
+        Move(engagedMoveDirection);
+        agent.nextPosition = transform.position;
+    }
+
+    private bool WouldCrossFocusLane(
+        float currentAngle,
+        float targetAngle,
+        float orbitDirection,
+        CombatDirector director,
+        Transform player
+    ) {
+        EnemyController focusEnemy = director.GetFocusEnemy();
+        if (focusEnemy == null || focusEnemy == enemyController)
+            return false;
+
+        Vector3 toFocus = focusEnemy.transform.position - player.position;
+        toFocus.y = 0f;
+
+        if (toFocus.sqrMagnitude < 0.001f)
+            return false;
+
+        float focusAngle = NormalizeAngle(Vector3.SignedAngle(director.SlotBasisForward, toFocus.normalized, Vector3.up));
+
+        if (Mathf.Abs(Mathf.DeltaAngle(currentAngle, focusAngle)) <= focusAvoidArc)
+            return true;
+
+        if (Mathf.Abs(Mathf.DeltaAngle(targetAngle, focusAngle)) <= focusAvoidArc)
+            return true;
+
+        return IsAngleBetweenAlongDirection(currentAngle, targetAngle, focusAngle, orbitDirection);
+    }
+
+    private bool IsAngleBetweenAlongDirection(float start, float end, float test, float direction) {
+        start = NormalizeAngle(start);
+        end = NormalizeAngle(end);
+        test = NormalizeAngle(test);
+
+        if (direction >= 0f) {
+            float total = ClockwiseDistance(start, end);
+            float toTest = ClockwiseDistance(start, test);
+            return toTest > 0f && toTest < total;
+        }
+
+        float counterTotal = ClockwiseDistance(end, start);
+        float counterToTest = ClockwiseDistance(test, start);
+        return counterToTest > 0f && counterToTest < counterTotal;
+    }
+
+    private float ClockwiseDistance(float from, float to) {
+        return Mathf.Repeat(to - from + 360f, 360f);
+    }
+
+    private float NormalizeAngle(float angle) {
+        return Mathf.Repeat(angle + 360f, 360f);
+    }
 
 }

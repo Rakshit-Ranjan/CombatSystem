@@ -19,7 +19,7 @@ public class CombatDirector : MonoBehaviour {
     [SerializeField] private float focusLockUntilTime;
     [SerializeField] private float stunFocusReleaseDelay;
     [SerializeField] private float maxFocusDistance;
-
+    
     private float lastRefreshTime;
     private Vector3 lastBasisForward = Vector3.forward;
     float[] angles = { 0, 45, 90, 135, 180, 225, 270, 315 };
@@ -75,6 +75,20 @@ public class CombatDirector : MonoBehaviour {
     public bool HasFocus(EnemyController enemy) {
         if(enemy == null) return false;
         return focusEnemy == enemy;
+    }
+
+    public float CirclingRadius => circlingRadius;
+
+    public Vector3 SlotBasisForward => slotBasisForward;
+
+    public bool TryGetAssignedSlotAngle(EnemyController enemy, out float angle) {
+        if (enemy == null)
+        {
+            angle = 0f;
+            return false;
+        }
+
+        return assignedAngles.TryGetValue(enemy, out angle);
     }
 
     public void UnregisterEnemy(EnemyController enemy) {

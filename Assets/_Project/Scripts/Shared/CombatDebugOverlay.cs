@@ -32,37 +32,37 @@ public class CombatDebugOverlay : MonoBehaviour
 
         GUILayout.BeginArea(new Rect(20f, 20f, 380f, 720f), GUI.skin.box);
 
-        GUILayout.Label("PLAYER");
-        if (playerCombat != null)
-        {
-            GUILayout.Label($"State: {playerCombat.CurrentState}");
-            GUILayout.Label($"State Timer: {playerCombat.StateTimer:F2}");
-            GUILayout.Label($"Parry Timer: {playerCombat.ParryTimer:F2}");
-            GUILayout.Label($"Parry Phase: {playerCombat.CurrentParryPhase}");
-            GUILayout.Label($"Dodge Timer: {playerCombat.DodgeTimer:F2}");
-            GUILayout.Label($"Dodge IFrames: {playerCombat.IsDodgeIFramesActive}");
-            GUILayout.Label($"Stunned Timer: {playerCombat.StunnedTimer:F2}");
-            GUILayout.Label($"Stunned Move Timer: {playerCombat.StunnedMovingTimer:F2}");
-        }
-        else
-        {
-            GUILayout.Label("Player CombatFSM not assigned");
-        }
+        // GUILayout.Label("PLAYER");
+        // if (playerCombat != null)
+        // {
+        //     GUILayout.Label($"State: {playerCombat.CurrentState}");
+        //     GUILayout.Label($"State Timer: {playerCombat.StateTimer:F2}");
+        //     GUILayout.Label($"Parry Timer: {playerCombat.ParryTimer:F2}");
+        //     GUILayout.Label($"Parry Phase: {playerCombat.CurrentParryPhase}");
+        //     GUILayout.Label($"Dodge Timer: {playerCombat.DodgeTimer:F2}");
+        //     GUILayout.Label($"Dodge IFrames: {playerCombat.IsDodgeIFramesActive}");
+        //     GUILayout.Label($"Stunned Timer: {playerCombat.StunnedTimer:F2}");
+        //     GUILayout.Label($"Stunned Move Timer: {playerCombat.StunnedMovingTimer:F2}");
+        // }
+        // else
+        // {
+        //     GUILayout.Label("Player CombatFSM not assigned");
+        // }
 
-        GUILayout.Space(8f);
+        // GUILayout.Space(8f);
 
-        if (playerHitbox != null)
-        {
-            GUILayout.Label($"Player Hitbox Active: {playerHitbox.IsActive}");
-            GUILayout.Label($"Player Current Attack: {(playerHitbox.CurrentAttack != null ? playerHitbox.CurrentAttack.name : "None")}");
-            GUILayout.Label($"Player Hit Targets: {playerHitbox.HitTargetCount}");
-        }
-        else
-        {
-            GUILayout.Label("Player Hitbox not assigned");
-        }
+        // if (playerHitbox != null)
+        // {
+        //     GUILayout.Label($"Player Hitbox Active: {playerHitbox.IsActive}");
+        //     GUILayout.Label($"Player Current Attack: {(playerHitbox.CurrentAttack != null ? playerHitbox.CurrentAttack.name : "None")}");
+        //     GUILayout.Label($"Player Hit Targets: {playerHitbox.HitTargetCount}");
+        // }
+        // else
+        // {
+        //     GUILayout.Label("Player Hitbox not assigned");
+        // }
 
-        GUILayout.Space(16f);
+        // GUILayout.Space(16f);
 
         GUILayout.Label("ENEMY");
         if (enemyCombat != null)
@@ -72,6 +72,7 @@ public class CombatDebugOverlay : MonoBehaviour
             GUILayout.Label($"Attack Cooldown Timer: {enemyCombat.AttackTimer:F2}");
             GUILayout.Label($"Stunned Timer: {enemyCombat.StunnedStateTimer:F2}");
             GUILayout.Label($"Stunned Move Timer: {enemyCombat.StunnedStateMovingTimer:F2}");
+            GUILayout.Label($"Is in attack Range: {enemyCombat.IsInAttackRange}");
             GUILayout.Label($"Blocks Locomotion: {enemyCombat.IsBlockingLocomotion}");
             GUILayout.Label($"Combo Index: {enemyCombat.ComboIndex}");
         }
