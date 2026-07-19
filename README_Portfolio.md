@@ -70,7 +70,7 @@ Owns enemy combat execution. It starts attacks only when the enemy brain request
 
 ### EnemyBrain
 
-Owns AI intent evaluation. It reads perception state and reduces it to `IDLE`, `CHASE`, or `ATTACK` at a configurable interval. It does not move or attack directly.
+Owns AI intent evaluation. It reads perception state and reduces it to `IDLE`, `CHASE`, or `ENGAGE` at a configurable interval. It does not move or attack directly.
 
 ### EnemyController
 
@@ -227,7 +227,7 @@ The biggest engineering lesson was that polished combat is less about one large 
 - Finish dodge i-frame and parry validation before damage resolution.
 - Add perfect parry and perfect dodge outcomes.
 - Stabilize one-hit-per-swing lifecycle across all animation events.
-- Add enemy circling, attack variety, utility AI, and group coordination.
+- Polish focus handoff, slot fairness, attack variety, utility AI, and group coordination.
 - Add boss AI and stance-specific combat responses.
 - Improve death handling, poise, stagger, and interruption rules.
 - Add debug visualization for MotionGraphs, hurtboxes, active frames, and AI state.

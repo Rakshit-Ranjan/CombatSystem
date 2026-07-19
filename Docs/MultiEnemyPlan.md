@@ -8,7 +8,8 @@ The first playable pass is now in place:
 - `CombatDirector` gates concurrent attackers
 - enemies register through `EnemyController` when they are engaged
 - `EnemyPerception` uses engagement / disengagement radii
-- denied attackers can use assigned ring slots for circling/repositioning
+- denied attackers use assigned ring-slot angles for orbit-style repositioning
+- non-focus enemies avoid crossing the lane between the player and focus enemy
 
 The main remaining problem is polish:
 - avoid awkward reshuffling after attacks
@@ -71,7 +72,7 @@ Spawn 2-4 enemies and make sure they can all:
 - tune `NavMeshAgent.radius`
 - tune stopping distance
 - tune attack range vs chase distance
-- make sure enemies do not constantly toggle between `CHASE` and `ATTACK`
+- make sure enemies do not constantly toggle between `CHASE` and `ENGAGE`
 
 ## Phase 2: Add a Combat Director
 
@@ -118,11 +119,11 @@ Keep `EnemyBrain` simple.
 
 Do not teach `EnemyBrain` group tactics yet.
 Instead:
-- `EnemyBrain` can still say `ATTACK`
+- `EnemyBrain` can still say `ENGAGE`
 - `EnemyController` or `EnemyCombatFSM` asks the director whether attacking is allowed
 
 Best first fit for your current structure:
-- `EnemyBrain` keeps producing `ATTACK`
+- `EnemyBrain` keeps producing `ENGAGE`
 - `EnemyController` decides:
   - if attack is allowed -> let combat proceed
   - if attack is not allowed -> keep repositioning instead of hard stop
@@ -188,7 +189,7 @@ Good fit:
 - `EnemyController` decides that a non-attacking enemy should `Circle`
 - `EnemyLocomotion` executes the movement
 
-### First simple circling implementation
+### Current circling implementation
 Pick a tangent direction around the player:
 - clockwise
 - counter-clockwise
@@ -197,9 +198,11 @@ Compute:
 - direction to player
 - perpendicular/tangent vector on XZ plane
 - move partly tangent, partly inward/outward to maintain ring radius
+- avoid crossing the protected arc around the focus enemy
 
 The result is:
 - enemies slide around the player instead of stopping in place
+- non-focus enemies orbit toward slots instead of directly pathing through the active duel
 
 ### Recommended control rule
 Circle only when:
@@ -268,7 +271,7 @@ Do not turn it into a group AI manager.
 Still only decides:
 - `IDLE`
 - `CHASE`
-- `ATTACK`
+- `ENGAGE`
 
 No need yet for:
 - flank intent
@@ -323,8 +326,8 @@ Director tracks nearby enemies and chooses one active attacker.
 Update `EnemyController` logic:
 - if combat blocks locomotion -> stop
 - if brain says `CHASE` -> chase player
-- if brain says `ATTACK` and director allows attack -> stop and let combat execute
-- if brain says `ATTACK` and director denies attack -> move to slot or circle
+- if brain says `ENGAGE` and director allows attack -> stop and let combat execute when in attack range
+- if brain says `ENGAGE` and director denies attack -> orbit toward assigned slot
 
 ### Step 5
 Add slot generation around the player.
@@ -386,9 +389,20 @@ Fix:
 ### Circling looks jittery
 Cause:
 - slot target changes every frame too aggressively
+- enemy is chasing a live world-space slot instead of orbiting toward a stable slot angle
 
 Fix:
 - update slots at a controlled cadence or smooth target movement
+- move by tangent/radial orbit correction and use a loose arrival threshold
+
+### Enemies cut through the duel
+Cause:
+- non-focus enemies path directly to slot world positions
+
+Fix:
+- use orbit movement around the player
+- avoid the protected focus lane between player and focus enemy
+- widen the focus avoid arc if enemies still cross too close
 
 ### Combat becomes unfair
 Cause:
@@ -418,6 +432,7 @@ Add circling for denied attackers.
 
 Success condition:
 - waiting enemies feel alive and intentional
+- waiting enemies orbit around the player/focus duel instead of cutting through it
 
 ### Milestone 4
 Tune fairness, cooldowns, and attack handoff.

@@ -12,7 +12,7 @@
 - [x] Enemy health component
 - [x] Enemy parry-stun response path
 - [x] Separate hit reaction duration vs movement timing
-- [ ] Stable one-hit-per-swing lifecycle
+- [x] Stable one-hit-per-swing lifecycle
 - [ ] Full dodge damage validation
 - [ ] Full parry damage validation
 - [ ] Perfect parry
@@ -29,6 +29,8 @@
 - [x] Combat ownership handoff
 - [x] Director system
 - [x] First-pass circling behavior
+- [x] Focus enemy selection
+- [x] Orbit-style slot repositioning
 - [ ] Attack selection variety
 - [ ] Group AI
 - [ ] Slot fairness / anti-reshuffle polish

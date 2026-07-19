@@ -161,3 +161,22 @@ Keep group attack permission outside `EnemyCombatFSM` and use the director as th
 
 ### Follow-up
 Expanded the first pass so engaged enemies register through `EnemyController`, slot assignment lives in `CombatDirector`, circling uses assigned ring targets, and slot-basis refresh is now throttled instead of firing on every denied attack.
+
+## 2026-07-19 - Combat Director V2 Orbit Pass
+
+### Feature
+Added focus-enemy pacing and orbit-style slot movement for non-focus enemies.
+
+### Problem
+Enemies moving directly to world-space slot positions could cut between the player and the current focus enemy, breaking the readable duel-like encounter shape.
+
+### Decision
+Keep slot ownership in `CombatDirector`, but expose assigned slot angles so `EnemyLocomotion` can move around the engagement ring with tangent movement, radial correction, and focus-lane avoidance.
+
+### Reason
+This preserves the active 1v1 duel lane while still letting other enemies maintain pressure through visible repositioning.
+
+### Future Improvements
+- Tune focus release and handoff timing.
+- Improve slot fairness and anti-reshuffle behavior.
+- Add debug gizmos for assigned slots, orbit direction, and protected focus lane.

@@ -1,22 +1,5 @@
 using UnityEngine;
 
-public enum CombatState {
-    IDLE,
-    WINDUP,
-    ATTACKING,
-    CIRCLING,
-    BLOCKING,
-    DODGING,
-    PARRYING,
-    STUNNED
-}
-
-public enum ParryPhase {
-    NONE,
-    STARTUP,
-    ACTIVE,
-    RECOVERY
-}
 
 
 public class CombatFSM : MonoBehaviour, IAttackReciever {
@@ -330,12 +313,12 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             return;
         }
         // get combo displacement accumulation
-        float lastAttackDistance =
-        currentAttack.motionGraph.forward.Evaluate(1f) *
-        currentAttack.motionGraph.distanceMultiplier;
-        Vector3 comboTransitionDelta = transform.forward * lastAttackDistance;
-        // Apply it ONCE
-        GetComponent<CharacterController>().Move(comboTransitionDelta);
+        // float lastAttackDistance =
+        // currentAttack.motionGraph.forward.Evaluate(1f) *
+        // currentAttack.motionGraph.distanceMultiplier;
+        // Vector3 comboTransitionDelta = transform.forward * lastAttackDistance;
+        // // Apply it ONCE
+        // GetComponent<CharacterController>().Move(comboTransitionDelta);
 
         currentAttack = nextAttack;
         hasQueuedCombo = false;

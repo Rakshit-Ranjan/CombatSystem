@@ -21,3 +21,20 @@ public enum EnemyIntent {
     IDLE, CHASE, ENGAGE
 } 
 
+public enum CombatState {
+    IDLE,
+    WINDUP,
+    ATTACKING,
+    CIRCLING,
+    BLOCKING,
+    DODGING,
+    PARRYING,
+    STUNNED
+}
+
+public enum ParryPhase {
+    NONE,
+    STARTUP,
+    ACTIVE,
+    RECOVERY
+}

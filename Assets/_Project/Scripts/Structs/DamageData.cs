@@ -16,4 +16,8 @@ public struct DamageData {
     
     public Transform attacker;
 
+    public bool wasParried;
+    public bool wasBlocked;
+    public bool killedTarget;
+
 }

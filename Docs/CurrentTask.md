@@ -23,10 +23,15 @@ Recreate Ghost of Tsushima encounter pacing.
 - EnemyLocomotion
 - Enemy movement animations
 - CombatDirector V1
+- CombatDirector V2 first pass
+- Focus enemy selection
+- Slot-angle assignment around the player
+- Orbit-style slot movement for non-focus enemies
+- Focus-lane avoidance so circling enemies avoid cutting through the active duel
 
 ## Current Focus
 
-- Attack permissions
-- Circling AI
-- Combat slots
-- Encounter pacing
+- Focus release and handoff timing
+- Slot fairness / anti-reshuffle polish
+- Tuning orbit radius, circling speed, and focus-lane width
+- Playtesting 2-4 enemy readability

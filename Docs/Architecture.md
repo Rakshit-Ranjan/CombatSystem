@@ -53,10 +53,10 @@ The architecture is intentionally data-driven for animation-bound gameplay and i
 
 ### Enemy Stack
 - `EnemyPerception`: senses player visibility, attack range, and engagement-band membership.
-- `EnemyBrain`: converts perception into a coarse intent (`IDLE`, `CHASE`, `ATTACK`).
-- `CombatDirector`: scene-level coordinator that limits concurrent attackers, owns ring-slot assignment, and controls when slot basis may refresh.
+- `EnemyBrain`: converts perception into a coarse intent (`IDLE`, `CHASE`, `ENGAGE`).
+- `CombatDirector`: scene-level coordinator that owns focus enemy selection, ring-slot angle assignment, and guarded slot-basis refresh.
 - `EnemyController`: bridges AI intent into locomotion or combat ownership and handles combat-group registration.
-- `EnemyLocomotion`: executes movement using `NavMeshAgent` plus `CharacterController`.
+- `EnemyLocomotion`: executes movement using `NavMeshAgent` plus `CharacterController`, including orbit-style ring repositioning for non-focus enemies.
 - `EnemyCombatFSM`: owns attack windup, attack execution, stun reactions, parry-stun entry, hitbox setup, and locomotion lock state.
 - `EnemyHealth`: owns enemy HP with separate max/current values and local death detection.
 
@@ -113,8 +113,10 @@ The architecture is intentionally data-driven for animation-bound gameplay and i
 ### Enemy AI Flow
 1. `EnemyPerception` senses player state.
 2. `EnemyBrain` converts perception to `EnemyIntent`.
-3. `EnemyController` routes intent into locomotion stop/chase or allows combat to own execution.
-4. `EnemyCombatFSM` rotates, attacks, or reacts to incoming hits.
+3. `EnemyController` routes intent into chase, focus attack, or non-focus orbit movement.
+4. `CombatDirector` gates focus ownership and provides stable slot angles around the player.
+5. `EnemyLocomotion` moves non-focus enemies around the ring without cutting through the active duel lane.
+6. `EnemyCombatFSM` rotates, attacks, or reacts to incoming hits.
 
 ## Component Relationships
 
@@ -130,6 +132,8 @@ graph TD
     AttackContext --> CombatFSM
     EnemyPerception --> EnemyBrain
     EnemyBrain --> EnemyController
+    EnemyController --> CombatDirector
+    CombatDirector --> EnemyLocomotion
     EnemyController --> EnemyLocomotion
     EnemyController --> EnemyCombatFSM
     EnemyCombatFSM --> Hitbox
@@ -226,6 +230,6 @@ graph TD
 
 ## Current Architectural Notes
 - Combat is already strongly asset-driven, and recent changes further separated reaction lock time from reaction movement time, but dodge/parry validation and anti-repeat-hit rules are still mid-implementation.
-- Multi-enemy support now includes first-pass combat-group registration, slot assignment, circling targets, and guarded slot-basis refresh through `CombatDirector`; fairness and spacing polish are still in progress.
+- Multi-enemy support now includes combat-group registration, focus enemy selection, slot-angle assignment, guarded slot-basis refresh, and orbit-style non-focus movement around the active duel lane; fairness and spacing polish are still in progress.
 - Enemy AI is intentionally simple and layered for future expansion.
 - Terrain utilities are currently separate from combat and should stay that way.

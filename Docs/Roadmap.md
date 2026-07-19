@@ -8,16 +8,13 @@
 - Player and enemy hitbox / hurtbox pipeline
 - Enemy perception / brain / controller / locomotion split
 - Enemy windup and attack execution
+- CombatDirector focus enemy and orbit-slot repositioning
 - Player and enemy hit reaction selection by hurtbox + direction
 - Basic player and enemy health components
 - Terrain / grass utility tooling
 
 ## Current Milestone
-Close the core 1v1 melee loop so one enemy and one player can:
-- attack
-- dodge / parry
-- take damage once per swing
-- react and recover reliably
+Polish CombatDirector V2 so multi-enemy encounters preserve a readable duel-like focus.
 
 ## Next Milestone
 Defensive combat validation:
@@ -25,7 +22,7 @@ Defensive combat validation:
 - parry validation and enemy-side parry stun polish
 - perfect parry / perfect dodge windows
 - stable one-hit-per-swing lifecycle
-- multi-enemy slot fairness and circling polish on top of the current combat director
+- focus release, handoff timing, and slot fairness on top of the current combat director
 
 ## Future Features
 - Enemy combo chains and attack variety

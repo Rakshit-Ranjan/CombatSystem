@@ -29,9 +29,9 @@ The project is in active prototype development. Core combat and AI systems are i
 ### Enemy AI
 
 - Enemy perception with view distance, raycast visibility, and attack range checks
-- Enemy brain that converts perception into `IDLE`, `CHASE`, or `ATTACK` intent
+- Enemy brain that converts perception into `IDLE`, `CHASE`, or `ENGAGE` intent
 - Enemy controller that routes AI intent into locomotion or combat ownership
-- Combat director that gates concurrent attackers and assigns first-pass circling slots
+- Combat director that maintains a focus enemy, assigns circling slots, and gates attack pressure
 - Enemy combat FSM with windup, attack, and stunned states
 - Hybrid `NavMeshAgent` pathfinding with `CharacterController` movement execution
 

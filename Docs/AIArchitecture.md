@@ -49,7 +49,7 @@ Owned state:
 Intent values:
 - `IDLE`
 - `CHASE`
-- `ATTACK`
+- `ENGAGE`
 
 ### `EnemyController`
 Responsibilities:
@@ -64,9 +64,10 @@ Responsibilities:
 Responsibilities:
 - coordinate shared attack permission across multiple enemies
 - track registered enemies
-- limit how many enemies may actively attack at once
+- maintain a single focus enemy for duel-like encounter pacing
 - assign and retain circling-slot angles per enemy
 - convert assigned slot angles into world positions around the player
+- expose assigned slot angles so locomotion can orbit toward slots instead of pathing directly through the duel
 - refresh slot basis only on guarded timing / yaw conditions
 
 ### `EnemyLocomotion`
@@ -74,6 +75,8 @@ Responsibilities:
 - pathfind using `NavMeshAgent`
 - move using `CharacterController`
 - face movement direction
+- move non-focus enemies around the engagement ring with tangent/radial orbit correction
+- avoid crossing the lane between the player and focus enemy while repositioning
 
 ### `EnemyCombatFSM`
 Responsibilities:
@@ -122,12 +125,12 @@ In practice, the system assumes:
 ```mermaid
 stateDiagram-v2
     [*] --> IDLE
-    IDLE --> CHASE: player visible but not in attack range
-    IDLE --> ATTACK: player visible and in attack range
+    IDLE --> CHASE: player visible but outside engagement range
+    IDLE --> ENGAGE: player visible and inside engagement range
     CHASE --> IDLE: player lost
-    CHASE --> ATTACK: enters attack range
-    ATTACK --> CHASE: player leaves range
-    ATTACK --> IDLE: player lost
+    CHASE --> ENGAGE: enters engagement range
+    ENGAGE --> CHASE: leaves engagement range
+    ENGAGE --> IDLE: player lost
 ```
 
 ## Combat Ownership Diagram
@@ -139,7 +142,7 @@ flowchart TD
     B -->|No| D{Intent}
     D -->|IDLE| E[Stop]
     D -->|CHASE| F[EnemyLocomotion handles movement]
-    D -->|ATTACK| G[EnemyController stops and allows EnemyCombatFSM to execute]
+    D -->|ENGAGE| G[Focus enemy may attack, others orbit assigned slots]
 ```
 
 ## Communication Rules
@@ -151,6 +154,7 @@ flowchart TD
 ## Current Architecture Notes
 - Current AI is simple and deterministic by design.
 - `EnemyCombatFSM` now also acts as the entry point for parry-induced enemy stun, while `EnemyController` remains unaware of that low-level combat reaction.
-- `CombatDirector` now does first-pass single-attacker coordination plus slot ownership for circling enemies; slot refresh is intentionally throttled to avoid reshuffling every attack.
+- `CombatDirector` now does first-pass single-focus coordination plus slot-angle ownership for circling enemies; slot refresh is intentionally throttled to avoid reshuffling every attack.
+- Non-focus enemies orbit toward assigned slot angles and avoid crossing the player/focus-enemy lane instead of moving directly to slot world positions.
 - The system is prepared for richer `EnemyBrain` logic later, such as utility AI, attack selection policies, and stronger coordination rules.
 - The existing split is the correct foundation for those upgrades.

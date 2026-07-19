@@ -15,7 +15,7 @@ Unity melee combat prototype with:
 - `Hitbox` emits `AttackContext`; defenders convert that into `DamageData` and reactions.
 
 ## Current Milestone
-Finish the full 1v1 combat loop with reliable damage, dodge/parry validation, and stable hitbox lifecycle.
+CombatDirector V2: preserve duel-like encounter pacing while multiple enemies remain active around the player.
 
 ## Important Gameplay Systems
 - `CombatFSM`: player combat state owner
@@ -91,11 +91,14 @@ Finish the full 1v1 combat loop with reliable damage, dodge/parry validation, an
 - A first-pass `CombatDirector` now gates concurrent enemy attacks, assigns circling slots, and tracks a shared slot basis around the player.
 - `EnemyPerception` now exposes engagement-range hysteresis so enemies do not join and leave the combat group on a single distance threshold.
 - `EnemyController` now owns combat-group registration and asks the director for guarded slot-basis refresh while engaged.
+- `EnemyBrain` now uses `ENGAGE` intent for enemies inside the engagement band; actual attack start still depends on focus permission and attack range.
+- Non-focus enemies orbit toward assigned slot angles with radial correction and focus-lane avoidance instead of directly pathing through the player/focus duel.
 - Defensive damage rules and hitbox dedupe still need hardening.
 
 ## Three-Minute Mental Model
 - Player and enemy both use FSM-driven combat.
 - Motion comes from authored curves, not raw code constants.
 - AI intent is separate from execution.
+- CombatDirector coordinates focus and slots, but locomotion executes the physical orbit movement.
 - Hitboxes send `AttackContext`; defenders choose what happens.
 - The project is currently at “working prototype” stage, not fully hardened production combat.

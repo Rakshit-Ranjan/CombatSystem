@@ -126,7 +126,7 @@ sequenceDiagram
     participant Player as CombatFSM
     participant Health as PlayerHealth
 
-    Brain->>Controller: ATTACK intent
+    Brain->>Controller: ENGAGE intent
     Controller->>Combat: stop locomotion ownership
     Combat->>Combat: enter WINDUP
     Combat->>Combat: face player
