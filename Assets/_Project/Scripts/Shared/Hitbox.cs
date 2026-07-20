@@ -67,7 +67,8 @@ public class Hitbox: MonoBehaviour {
             target = other.transform,
             attackOrigin = owner.position,
             hurtboxType = hurtbox.hurtboxType,
-            timeToImpact=0f
+            timeToImpact=0f,
+            feedbackData = currentAttack.feedbackData
         };
 
         reciever.OnIncomingAttack(ctx);

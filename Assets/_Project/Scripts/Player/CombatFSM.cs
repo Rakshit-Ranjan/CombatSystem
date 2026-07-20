@@ -385,6 +385,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                         Vector3 dir = transform.position - enemy.transform.position;
                         dir.y = 0;
                         locomotion.FaceDirection(dir);
+                        CombatFeedbackManager.Instance.PlayParryFeedback(ctx,data);
                         return;
                     }
 
