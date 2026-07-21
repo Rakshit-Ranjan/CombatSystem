@@ -20,10 +20,20 @@ public class CombatFeedbackManager : MonoBehaviour {
             return;
         }
         PlayHitstopEffect(context.feedbackData.hitStopDuration);
+        PlayParryVisualEffect(context, data);
     }
 
     private void PlayHitstopEffect(float duration) {
         StartCoroutine(HitstopRoutine(duration));
+    }
+
+    private void PlayParryVisualEffect(AttackContext context, DamageData data) {
+        if(context.feedbackData == null) {
+            print("no feedback data");
+            return;
+        }
+        Instantiate(context.feedbackData.hitVFX, data.hitPoint, Quaternion.identity);
+
     }
 
     IEnumerator HitstopRoutine(float duration) {

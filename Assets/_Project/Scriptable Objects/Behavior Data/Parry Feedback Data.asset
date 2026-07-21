@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7e45ba0f94612b4894e99ba451178bb, type: 3}
   m_Name: Parry Feedback Data
   m_EditorClassIdentifier: Assembly-CSharp::CombatFeedbackData
-  hitVFX: {fileID: 0}
+  hitVFX: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
   hitSound: {fileID: 0}
   hitStopDuration: 0.05
   weaponSparks: {fileID: 0}
