@@ -385,6 +385,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                         Vector3 dir = transform.position - enemy.transform.position;
                         dir.y = 0;
                         locomotion.FaceDirection(dir);
+                        data.hitPoint = weaponHitbox.hitVFXSpawnPoint.position;
                         CombatFeedbackManager.Instance.PlayParryFeedback(ctx,data);
                         return;
                     }
@@ -394,6 +395,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
 
                 break;
             default:
+                CombatFeedbackManager.Instance.PlayHitFeedback(ctx, data);
                 ResolveNormalHit(ctx, data);
                 break;
         }

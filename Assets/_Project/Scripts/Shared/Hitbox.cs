@@ -8,7 +8,7 @@ public class Hitbox: MonoBehaviour {
     [Header("Owner")]
     [SerializeField] private Transform owner;
     [SerializeField] private CombatTeam team;
-
+    public Transform hitVFXSpawnPoint;
     [Header("Runtime")]
     [SerializeField] private AttackData currentAttack;
     [SerializeField] private Collider hitboxCollider;
@@ -68,7 +68,7 @@ public class Hitbox: MonoBehaviour {
             attackOrigin = owner.position,
             hurtboxType = hurtbox.hurtboxType,
             timeToImpact=0f,
-            feedbackData = currentAttack.feedbackData
+            parryFeedbackData = currentAttack.feedbackData
         };
 
         reciever.OnIncomingAttack(ctx);

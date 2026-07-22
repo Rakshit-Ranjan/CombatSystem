@@ -15,12 +15,17 @@ public class CombatFeedbackManager : MonoBehaviour {
     }
 
     public void PlayParryFeedback(AttackContext context, DamageData data) {
-        if(context.feedbackData == null) {
+        if(context.parryFeedbackData == null) {
             print("no feedback data");
             return;
         }
-        PlayHitstopEffect(context.feedbackData.hitStopDuration);
+        PlayHitstopEffect(context.parryFeedbackData.hitStopDuration);
         PlayParryVisualEffect(context, data);
+    }
+
+    public void PlayHitFeedback(AttackContext ctx, DamageData data) {
+        if(ctx.parryFeedbackData == null) return;
+        PlayHitstopEffect(ctx.parryFeedbackData.hitStopDuration);
     }
 
     private void PlayHitstopEffect(float duration) {
@@ -28,11 +33,11 @@ public class CombatFeedbackManager : MonoBehaviour {
     }
 
     private void PlayParryVisualEffect(AttackContext context, DamageData data) {
-        if(context.feedbackData == null) {
+        if(context.parryFeedbackData == null) {
             print("no feedback data");
             return;
         }
-        Instantiate(context.feedbackData.hitVFX, data.hitPoint, Quaternion.identity);
+        Instantiate(context.parryFeedbackData.hitVFX, data.hitPoint, Quaternion.LookRotation(data.hitNormal));
 
     }
 

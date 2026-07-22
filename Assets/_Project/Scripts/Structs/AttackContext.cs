@@ -17,6 +17,7 @@ public struct AttackContext {
 
     public float timeToImpact;
 
-    public CombatFeedbackData feedbackData;
+    public CombatFeedbackData parryFeedbackData;
+    public CombatFeedbackData hitFeedbackData;
 
 }

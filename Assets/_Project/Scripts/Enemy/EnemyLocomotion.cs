@@ -83,6 +83,9 @@ public class EnemyLocomotion : MonoBehaviour {
         }
         float normalizedSpeed = Mathf.Clamp01(desiredVelocity / moveSpeed);
         animator.SetFloat("Speed", normalizedSpeed, 0.05f, Time.deltaTime);
+        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
+        animator.SetFloat("Horizontal", localVel.x);
+        animator.SetFloat("Vertical", localVel.z);
     }
 
     public void MoveToPlayer(Transform t) {
@@ -91,6 +94,9 @@ public class EnemyLocomotion : MonoBehaviour {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
+            Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity * Speed);
+            animator.SetFloat("Horizontal", localVel.x);
+            animator.SetFloat("Vertical", localVel.z);
         }
     }
 
@@ -100,7 +106,6 @@ public class EnemyLocomotion : MonoBehaviour {
             case CombatState.ATTACKING:
                 Stop();
                 break;
-
             case CombatState.CIRCLING:
                 OrbitToAssignedSlot();
                 break;
