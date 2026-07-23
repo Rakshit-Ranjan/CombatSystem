@@ -65,10 +65,13 @@ public class Hitbox: MonoBehaviour {
             attackData = currentAttack,
             attackDirection = owner.forward,
             target = other.transform,
+            attackHitPoint = other.bounds.ClosestPoint(transform.position),
+            
             attackOrigin = owner.position,
             hurtboxType = hurtbox.hurtboxType,
             timeToImpact=0f,
-            parryFeedbackData = currentAttack.feedbackData
+            parryFeedbackData = currentAttack.parryFeedbackData,
+            hitFeedbackData = currentAttack.hitFeedbackData
         };
 
         reciever.OnIncomingAttack(ctx);

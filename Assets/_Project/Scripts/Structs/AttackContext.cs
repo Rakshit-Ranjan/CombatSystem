@@ -11,6 +11,7 @@ public struct AttackContext {
     public MotionGraph hitGraph;
 
     public Vector3 attackOrigin;
+    public Vector3 attackHitPoint;
     public Vector3 attackDirection;
 
     public HurtboxType hurtboxType;

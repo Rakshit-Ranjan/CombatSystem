@@ -7,7 +7,10 @@ public class AttackData : ScriptableObject {
     public string attackName;
     public AnimationClip attackClip;
 
-    public CombatFeedbackData feedbackData;
+    [Header("Feedback Data Settings")]
+    public CombatFeedbackData parryFeedbackData;
+    public CombatFeedbackData hitFeedbackData;
+
 
     [Header("Movement Settings")]
     public MotionGraph motionGraph;

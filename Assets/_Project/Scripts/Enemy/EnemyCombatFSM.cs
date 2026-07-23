@@ -226,6 +226,8 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         if (!CombatDirector.Instance.HasFocus(enemyController)) {
             CombatDirector.Instance.SetFocusEnemy(enemyController);
         }
+        data.hitPoint = ctx.attackHitPoint;
+        CombatFeedbackManager.Instance.PlayHitFeedback(ctx, data);
 
         ResetAttackState();
         TransitionTo(CombatState.STUNNED);

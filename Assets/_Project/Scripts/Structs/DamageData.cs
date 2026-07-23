@@ -11,6 +11,8 @@ public struct DamageData {
     public bool isUnblockable;
     public bool isUnparryable;
 
+    public Vector3 parryVFXPoint;
+
     public Vector3 hitPoint;
     public Vector3 hitNormal;
     

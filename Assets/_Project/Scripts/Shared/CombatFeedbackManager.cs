@@ -13,7 +13,7 @@ public class CombatFeedbackManager : MonoBehaviour {
         }
         Instance = this;
     }
-
+    #region  feedback functions
     public void PlayParryFeedback(AttackContext context, DamageData data) {
         if(context.parryFeedbackData == null) {
             print("no feedback data");
@@ -24,9 +24,16 @@ public class CombatFeedbackManager : MonoBehaviour {
     }
 
     public void PlayHitFeedback(AttackContext ctx, DamageData data) {
-        if(ctx.parryFeedbackData == null) return;
-        PlayHitstopEffect(ctx.parryFeedbackData.hitStopDuration);
+        if(ctx.hitFeedbackData == null) return;
+        print("Hitting");
+        PlayHitstopEffect(ctx.hitFeedbackData.hitStopDuration);
+        PlayHitVFX(ctx, data);
     }
+
+    #endregion
+
+
+    #region Effects functions
 
     private void PlayHitstopEffect(float duration) {
         StartCoroutine(HitstopRoutine(duration));
@@ -37,8 +44,15 @@ public class CombatFeedbackManager : MonoBehaviour {
             print("no feedback data");
             return;
         }
-        Instantiate(context.parryFeedbackData.hitVFX, data.hitPoint, Quaternion.LookRotation(data.hitNormal));
+        Instantiate(context.parryFeedbackData.hitVFX, data.parryVFXPoint, Quaternion.LookRotation(-context.attackDirection));
 
+    }
+
+    private void PlayHitVFX(AttackContext ctx, DamageData data) {
+        if(ctx.hitFeedbackData == null) {
+            return;
+        }
+        Instantiate(ctx.hitFeedbackData.bloodPrefab, data.hitPoint, Quaternion.LookRotation(-ctx.attackDirection), ctx.target);
     }
 
     IEnumerator HitstopRoutine(float duration) {
@@ -54,6 +68,6 @@ public class CombatFeedbackManager : MonoBehaviour {
         Time.fixedDeltaTime = 0.02f;
 
     }
-
+    #endregion
 
 }
