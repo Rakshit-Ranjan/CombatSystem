@@ -94,10 +94,10 @@ public class EnemyLocomotion : MonoBehaviour {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
-            Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity * Speed);
-            animator.SetFloat("Horizontal", localVel.x);
-            animator.SetFloat("Vertical", localVel.z);
         }
+        Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity * Speed);
+        animator.SetFloat("Horizontal", localVel.x);
+        animator.SetFloat("Vertical", localVel.z);
     }
 
     public void HandleLocomotionWhileEngaged() {
