@@ -21,6 +21,8 @@ public class PlayerLocomotionController : MonoBehaviour {
     [Header("Animator Damping")]
     [SerializeField] private float speedDampTime = 0.1f;
     [SerializeField] private float velocityDampTime = 0.1f;
+    [SerializeField] private EnemyController lockedEnemy;
+    [SerializeField] private float lockOnDistance = 12f;
 
     // Input
     private InputSystem_Actions inputActions;
@@ -62,6 +64,7 @@ public class PlayerLocomotionController : MonoBehaviour {
     private void OnEnable() {
         inputActions.Player.Enable();
         inputActions.Player.Move.performed += OnMovePerformed;
+        inputActions.Player.Focus.performed += OnFocusPerformed;
         inputActions.Player.Move.canceled += OnMoveCanceled;
         inputActions.Player.Sprint.performed += OnSprintPerformed;
         inputActions.Player.Walk.performed += OnWalkPerformed;
@@ -70,7 +73,8 @@ public class PlayerLocomotionController : MonoBehaviour {
     private void OnDisable() {
         inputActions.Player.Move.performed -= OnMovePerformed;
         inputActions.Player.Move.canceled -= OnMoveCanceled;
-        inputActions.Player.Sprint.performed -= OnSprintPerformed;
+        inputActions.Player.Focus.performed -= OnFocusPerformed;
+        inputActions.Player.Sprint.performed -= OnSprintPerformed;  
         inputActions.Player.Walk.performed -= OnWalkPerformed;
         inputActions.Player.Disable();
     }
@@ -83,6 +87,19 @@ public class PlayerLocomotionController : MonoBehaviour {
         moveInput = Vector2.zero;
     }
 
+    private void OnFocusPerformed(InputAction.CallbackContext ctx) {
+        if(isInCombat) {
+            lockedEnemy = null;
+            isInCombat = false;
+            return;
+        }
+        EnemyController focusEnemy = CombatDirector.Instance.GetFocusEnemy();
+
+        if(focusEnemy == null ) return;
+        lockedEnemy = focusEnemy;
+        isInCombat = true;
+    }
+
     private void OnSprintPerformed(InputAction.CallbackContext context) {
         isSprinting = !isSprinting;
     }
@@ -92,6 +109,7 @@ public class PlayerLocomotionController : MonoBehaviour {
     }
 
     private void Update() {
+        ValidateLockOnEnemy();
         HandleMovement();
         HandleRotation();
         HandleAnimations();
@@ -154,12 +172,26 @@ public class PlayerLocomotionController : MonoBehaviour {
         controller.Move(9.81f * Time.deltaTime * Vector3.down);
     }
 
+    private void ValidateLockOnEnemy() {
+        if(!isInCombat) return;
+        if(lockedEnemy == null) {
+            isInCombat = false;
+            return;
+        }
+
+        if(Vector3.Distance(lockedEnemy.transform.position, transform.position) > lockOnDistance) {
+            lockedEnemy = null;
+            isInCombat = false;
+        }
+    }
+
     private void HandleRotation() {
         Vector3 lookDirection = Vector3.zero;
 
         if (isInCombat) {
             // In combat, face camera direction
-            // lookDirection = Camera.main.transform.forward;
+            lookDirection = lockedEnemy.transform.position - transform.position;
+
         }
         else if (moveDirection.magnitude > 0.1f) {
             // Outside combat, face movement direction
@@ -192,8 +224,18 @@ public class PlayerLocomotionController : MonoBehaviour {
         // Normalize speed (0 to 1 range where 1 = sprint speed)
         float normalizedSpeed = currentSpeed / sprintSpeed;
 
-        // Update animator parameters
+        // Update animator parameters   
+
         animator.SetFloat(speedHash, normalizedSpeed, speedDampTime, Time.deltaTime);
+        animator.SetBool("targetLocked", isInCombat);
+
+        if(isInCombat) {
+            animator.SetFloat("Horizontal", velocityX / combatMoveSpeed, velocityDampTime, Time.deltaTime);
+            animator.SetFloat("Vertical", velocityZ / combatMoveSpeed, velocityDampTime, Time.deltaTime);
+        } else {
+            animator.SetFloat("Horizontal", 0f, velocityDampTime, Time.deltaTime);
+            animator.SetFloat("Vertical", 0f, velocityDampTime, Time.deltaTime);
+        }
     }
 
     // Public methods for combat system

@@ -52,7 +52,11 @@ public class EnemyLocomotion : MonoBehaviour {
     public void Stop() {
         agent.ResetPath();
         engagedMoveDirection = Vector3.zero;
+        Speed = 0f;
+
         animator.SetFloat("Speed", 0f, 0.05f, Time.deltaTime);
+        animator.SetFloat("Horizontal", 0f, 0.05f, Time.deltaTime);
+        animator.SetFloat("Vertical", 0f, 0.05f, Time.deltaTime);
     }
 
     public void SetTarget(Transform t) {
@@ -75,47 +79,74 @@ public class EnemyLocomotion : MonoBehaviour {
 
     public void HandleLocomotion() {
         float desiredVelocity = agent.desiredVelocity.magnitude;
+
         SetVelocity(moveSpeed);
+
         if (desiredVelocity > 0.01f) {
             Move(agent.desiredVelocity);
             agent.nextPosition = transform.position;
             FaceDirection(agent.desiredVelocity);
         }
+
         float normalizedSpeed = Mathf.Clamp01(desiredVelocity / moveSpeed);
+
         animator.SetFloat("Speed", normalizedSpeed, 0.05f, Time.deltaTime);
-        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
-        animator.SetFloat("Horizontal", localVel.x);
-        animator.SetFloat("Vertical", localVel.z);
+        animator.SetFloat("Horizontal", 0f, 0.05f, Time.deltaTime);
+        animator.SetFloat("Vertical", 0f, 0.05f, Time.deltaTime);
     }
 
     public void MoveToPlayer(Transform t) {
         SetTarget(t);
-        if (agent.desiredVelocity.magnitude > 0.01f) {
-            Move(agent.desiredVelocity);
-            agent.nextPosition = transform.position;
-            FaceDirection(agent.desiredVelocity);
+
+        Vector3 desired = agent.desiredVelocity;
+        desired.y = 0f;
+
+        if (desired.sqrMagnitude < 0.001f) {
+            Stop();
+            return;
         }
-        Vector3 localVel = transform.InverseTransformDirection(agent.desiredVelocity * Speed);
-        animator.SetFloat("Horizontal", localVel.x);
-        animator.SetFloat("Vertical", localVel.z);
+
+        SetVelocity(circlingSpeed);
+
+        engagedMoveDirection = desired.normalized;
+        Move(engagedMoveDirection);
+        agent.nextPosition = transform.position;
+
+        FaceDirection(t.position - transform.position);
+
+        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
+
+        animator.SetFloat("Speed", 0f, 0.05f, Time.deltaTime);
+        animator.SetFloat("Horizontal", localVel.x, 0.05f, Time.deltaTime);
+        animator.SetFloat("Vertical", localVel.z, 0.05f, Time.deltaTime);
     }
 
     public void HandleLocomotionWhileEngaged() {
-        switch (combat.CurrentState) {
+        engagedMoveDirection = Vector3.zero;
 
-            case CombatState.ATTACKING:
-                Stop();
+        switch (combat.CurrentState) {
+            case CombatState.IDLE:
+                HandleFocusedApproachOrOrbit();
                 break;
+
             case CombatState.CIRCLING:
                 OrbitToAssignedSlot();
                 break;
 
+            case CombatState.ATTACKING:
+            case CombatState.WINDUP:
+            case CombatState.STUNNED:
+                Stop();
+                break;
         }
-        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
-        SetVelocity(circlingSpeed);
-        animator.SetFloat("Horizontal", localVel.x);
-        animator.SetFloat("Vertical", localVel.z);
 
+        // SetVelocity(circlingSpeed);
+
+        Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
+
+        animator.SetFloat("Speed", 0f, 0.05f, Time.deltaTime);
+        animator.SetFloat("Horizontal", localVel.x, 0.05f, Time.deltaTime);
+        animator.SetFloat("Vertical", localVel.z, 0.05f, Time.deltaTime);
     }
 
     public void ToCombatAnimation(bool c) {
@@ -125,6 +156,57 @@ public class EnemyLocomotion : MonoBehaviour {
     public void SetVelocity(float speed) {
         Speed = speed;
     }
+
+    private void HandleFocusedApproachOrOrbit() {
+        CombatDirector director = CombatDirector.Instance;
+
+        if (director == null || enemyController.playerT == null) {
+            Stop();
+            return;
+        }
+
+        if (!director.HasFocus(enemyController)) {
+            OrbitToAssignedSlot();
+            return;
+        }
+
+        Vector3 toPlayer = enemyController.playerT.position - transform.position;
+        toPlayer.y = 0f;
+
+        FaceDirection(toPlayer);
+
+        if (perception.IsInAttackRange) {
+            Stop();
+            return;
+        }
+
+        SetTarget(enemyController.playerT);
+
+        Vector3 desired = agent.desiredVelocity;
+        desired.y = 0f;
+
+        if (desired.sqrMagnitude < 0.001f) {
+            desired = agent.steeringTarget - transform.position;
+            desired.y = 0f;
+        }
+
+        if (desired.sqrMagnitude < 0.001f) {
+            desired = toPlayer;
+            desired.y = 0f;
+        }
+
+        if (desired.sqrMagnitude < 0.001f) {
+            engagedMoveDirection = Vector3.zero;
+            return;
+        }
+
+        SetVelocity(circlingSpeed);
+
+        engagedMoveDirection = desired.normalized;
+        Move(engagedMoveDirection);
+        agent.nextPosition = transform.position;
+    }
+
 
     private void OrbitToAssignedSlot() {
         CombatDirector director = CombatDirector.Instance;

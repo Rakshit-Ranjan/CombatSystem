@@ -54,7 +54,7 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     public float StunnedTimer => stunnedTimer;
     public float StunnedMovingTimer => stunnedMovingTimer;
 
-
+    #region Unity functions
     void Awake() {
         if (animator == null) animator = GetComponent<Animator>();
         if (locomotion == null) locomotion = GetComponent<PlayerLocomotionController>();
@@ -91,8 +91,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                 // Additional states like BLOCKING, DODGING, STUNNED can be handled here
         }
     }
+    #endregion
 
-    /* State Handlers */
+    #region  State Handlers 
     private void HandleIdleState() {
         if (inputBuffer.TryConsumeInput(out InputActionType inputType)) {
             switch (inputType) {
@@ -244,7 +245,10 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             TransitionTo(CombatState.IDLE);
         }
     }
-    /* Helper Methods */
+    
+    #endregion
+ 
+    #region Helper Methods
     public void ExitDodgingState() {
         TransitionToIdle();
     }
@@ -254,7 +258,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
 
         TransitionTo(CombatState.ATTACKING);
 
-        locomotion.SetCombatMode(true);
         locomotion.LockMovement();
         weaponHitbox.SetAttackData(currentAttack);
         if (attackData.motionGraph != null) {
@@ -269,7 +272,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
     private void StartParry() {
         TransitionTo(CombatState.PARRYING);
         parryTimer = 0f;
-        locomotion.SetCombatMode(true);
         locomotion.LockMovement();
         // Play parry animation if available
         animator.Play("Parry", 1, 0f);
@@ -281,7 +283,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         dodgeSampler.Begin(dodgeData.dodgeGraph);
         (worldDodgeDir, localDodgeDir) = locomotion.GetDodgeDirection();
         (DodgeForward, DodgeUp, DodgeRight) = (worldDodgeDir, Vector3.up, Vector3.Cross(Vector3.up, worldDodgeDir).normalized);
-        locomotion.SetCombatMode(true);
         locomotion.LockMovement();
         animator.SetFloat("DodgeX", localDodgeDir.x);
         animator.SetFloat("DodgeZ", localDodgeDir.z);
@@ -347,7 +348,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         currentAttackChain = null;
         weaponHitbox.SetAttackData(null);
         locomotion.UnlockMovement();
-        locomotion.SetCombatMode(false);
         attackSampler?.Reset();
         dodgeSampler?.Reset();
 
@@ -454,8 +454,9 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
         return hurtboxReactionMaps[0].data;
 
     }
-
-    // DEBUG methods
+    #endregion
+  
+    #region  DEBUG methods
 
     public bool IsDodgeIFramesActive {
         get {
@@ -484,6 +485,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             return ParryPhase.NONE;
         }
     }
-
+    #endregion
 
 }

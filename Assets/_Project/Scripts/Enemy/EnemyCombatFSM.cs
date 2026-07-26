@@ -94,7 +94,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
                     TransitionTo(CombatState.WINDUP);
                 }
             } else {
-                locomotion.MoveToPlayer(enemyController.playerT);
+                return;
             }
         }
         else {
