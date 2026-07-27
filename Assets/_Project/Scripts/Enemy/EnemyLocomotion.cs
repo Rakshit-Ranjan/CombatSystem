@@ -140,7 +140,7 @@ public class EnemyLocomotion : MonoBehaviour {
                 break;
         }
 
-        // SetVelocity(circlingSpeed);
+        SetVelocity(circlingSpeed);
 
         Vector3 localVel = transform.InverseTransformDirection(engagedMoveDirection * Speed);
 
