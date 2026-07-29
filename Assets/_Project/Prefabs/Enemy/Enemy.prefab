@@ -2040,6 +2040,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   owner: {fileID: 6142337007547435851}
   team: 1
+  hitVFXSpawnPoint: {fileID: 0}
   currentAttack: {fileID: 0}
   hitboxCollider: {fileID: 0}
 --- !u!1 &4138335217492941364
@@ -6158,8 +6159,12 @@ MonoBehaviour:
   animator: {fileID: 0}
   moveSpeed: 3
   circlingSpeed: 2
-  rotationSpeed: 8
+  rotationSpeed: 2
   gravityY: -20
+  slotArriveDistance: 0.8
+  slotAngleArriveThreshold: 8
+  radialCorrectionStrength: 0.75
+  focusAvoidArc: 40
 --- !u!114 &3637960870449820443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6223,10 +6228,10 @@ MonoBehaviour:
   - data: {fileID: 11400000, guid: b6287437d1a6bb94fa83e5a096203145, type: 2}
     hurtboxType: 3
     hitDirectionType: 1
-  - data: {fileID: 11400000, guid: b6287437d1a6bb94fa83e5a096203145, type: 2}
+  - data: {fileID: 11400000, guid: 31c7b400669ff2f4e8837f1b1475d0c0, type: 2}
     hurtboxType: 3
     hitDirectionType: 2
-  - data: {fileID: 11400000, guid: b6287437d1a6bb94fa83e5a096203145, type: 2}
+  - data: {fileID: 11400000, guid: 01182bb6764216b4e97b18efba489e91, type: 2}
     hurtboxType: 3
     hitDirectionType: 3
   combatState: 0

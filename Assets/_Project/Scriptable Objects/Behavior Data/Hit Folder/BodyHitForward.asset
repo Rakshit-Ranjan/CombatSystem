@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfcb2da83c0709d40b4d76dcfa53849f, type: 3}
-  m_Name: BodyHit
+  m_Name: BodyHitForward
   m_EditorClassIdentifier: Assembly-CSharp::HitReactionData
   clip: {fileID: 7400000, guid: 8135b5c7235fab94ca0cd6bf33a36635, type: 2}
   hitReactionGraph: {fileID: 11400000, guid: 829150aec20b5cd4fa1a7d3ea5bdd2d6, type: 2}
