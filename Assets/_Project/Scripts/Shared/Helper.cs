@@ -29,6 +29,7 @@ public enum CombatState {
     BLOCKING,
     DODGING,
     PARRYING,
+    DEAD,
     STUNNED
 }
 

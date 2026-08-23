@@ -55,7 +55,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
     }
 
     void Update() {
-        BlocksLocomotion = combatState == CombatState.STUNNED || combatState == CombatState.ATTACKING || combatState == CombatState.WINDUP;
+        BlocksLocomotion = combatState == CombatState.STUNNED || combatState == CombatState.ATTACKING || combatState == CombatState.WINDUP || combatState == CombatState.DEAD;
         stateTimer += Time.deltaTime;
         if (attackTimer > 0)
             attackTimer -= Time.deltaTime;
@@ -74,6 +74,9 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
                 break;
             case CombatState.CIRCLING:
                 HandleCirclingState();
+                break;
+            case CombatState.DEAD:
+                HandleDeadState();
                 break;
         }
     }
@@ -191,6 +194,10 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
 
     }
 
+    private void HandleDeadState() {
+        animator.SetTrigger("Death");
+    }
+
     public void TransitionTo(CombatState state) {
         stateTimer = 0f;
         combatState = state;
@@ -203,6 +210,7 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
             damage = ctx.attackData.damage,
             poiseDamage = ctx.attackData.damage
         };
+        print(data.damage);
         float angleOfAttack = Vector3.SignedAngle(transform.forward, ctx.attackDirection, Vector3.up);
         HitDirectionType directionType;
         if (angleOfAttack >= -45f && angleOfAttack <= 45f) {
@@ -217,22 +225,35 @@ public class EnemyCombatFSM : MonoBehaviour, IAttackReciever {
         else {
             directionType = HitDirectionType.FORWARD;
         }
-        HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
-        stunnedSampler.Begin(reaction.hitReactionGraph);
-        stunnedStateTimer = reaction.hitReactionDuraion;
-        stunnedStateMovingTimer = reaction.hitReactionForce;
-        (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
+        bool willDie = health.WillDie(data);
+        data.killedTarget = willDie;
+        if(willDie) {
+            data.hitPoint = ctx.attackHitPoint;
+            CombatFeedbackManager.Instance.PlayFatalHitFeedback(ctx, data);
+            if(enemyController == CombatDirector.Instance.GetFocusEnemy()) 
+            if(CombatDirector.Instance.HasFocus(enemyController))
+                CombatDirector.Instance.ClearFocusEnemy(enemyController);
+            CombatDirector.Instance.UnregisterEnemy(enemyController);
+            TransitionTo(CombatState.DEAD);
+            
+        } else {
+            HitReactionData reaction = GetHitReaction(ctx.hurtboxType, directionType);
+            stunnedSampler.Begin(reaction.hitReactionGraph);
+            stunnedStateTimer = reaction.hitReactionDuraion;
+            stunnedStateMovingTimer = reaction.hitReactionForce;
+            (HitForward, HitUp, HitRight) = (ctx.attackDirection, Vector3.up, Vector3.Cross(Vector3.up, ctx.attackDirection).normalized);
 
-        if (!CombatDirector.Instance.HasFocus(enemyController)) {
-            CombatDirector.Instance.SetFocusEnemy(enemyController);
-        }
-        data.hitPoint = ctx.attackHitPoint;
-        CombatFeedbackManager.Instance.PlayHitFeedback(ctx, data);
+            if (!CombatDirector.Instance.HasFocus(enemyController)) {
+                CombatDirector.Instance.SetFocusEnemy(enemyController);
+            }
+            data.hitPoint = ctx.attackHitPoint;
+            CombatFeedbackManager.Instance.PlayHitFeedback(ctx, data);
 
-        ResetAttackState();
-        TransitionTo(CombatState.STUNNED);
-        if (reaction != null) {
-            PlayHitReaction(reaction);
+            ResetAttackState();
+            TransitionTo(CombatState.STUNNED);
+            if (reaction != null) {
+                PlayHitReaction(reaction);
+            }
         }
         health.TakeDamage(data);
     }

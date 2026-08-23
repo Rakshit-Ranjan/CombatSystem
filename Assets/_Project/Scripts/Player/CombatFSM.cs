@@ -368,7 +368,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                 if (dodgeData != null && dodgeData.duration > 0f) {
                     float normalizedTime = dodgeTimer / dodgeData.duration;
                     if (normalizedTime >= dodgeData.iFramesStart && normalizedTime <= dodgeData.iFramesEnd) {
-                        Debug.Log("Dodge Success");
                         return;
                     }
                 }
@@ -379,7 +378,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
                     float normalizedTime = parryTimer / (parryData.activeTime + parryData.recoveryTime + parryData.startupTime);
 
                     if (parryTimer > parryData.startupTime && parryTimer <= parryData.startupTime + parryData.activeTime) {
-                        Debug.Log("Parry Success");
                         EnemyCombatFSM enemy = data.attacker.GetComponent<EnemyCombatFSM>();
                         enemy.EnterParryStun(transform, ctx, HitDirectionType.FORWARD);
                         Vector3 dir = transform.position - enemy.transform.position;
@@ -397,7 +395,6 @@ public class CombatFSM : MonoBehaviour, IAttackReciever {
             default:
                 data.hitPoint = ctx.attackHitPoint; 
                 CombatFeedbackManager.Instance.PlayHitFeedback(ctx, data);
-                print("Got Hit");
                 ResolveNormalHit(ctx, data);
                 break;
         }

@@ -15,6 +15,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable {
         currentHealth = maxHealth;
     }
 
+    public bool WillDie(DamageData data) => currentHealth - data.damage <= 0f;
+
     public void TakeDamage(DamageData data) {
         if (IsDead)
             return;
@@ -22,7 +24,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable {
         currentHealth -= data.damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        // Debug.Log($"Enemy took {data.damage} damage from {data.attacker?.name}. HP: {currentHealth}/{maxHealth}");
+        Debug.Log($"Enemy took {data.damage} damage from {data.attacker?.name}. HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0f) {
             Die();
@@ -38,7 +40,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable {
     }
 
     private void Die() {
-        Debug.Log("Player died");
+        Debug.Log("Enemy died");
     }
 
 }

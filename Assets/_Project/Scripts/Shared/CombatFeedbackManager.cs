@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class CombatFeedbackManager : MonoBehaviour {
@@ -6,12 +7,24 @@ public class CombatFeedbackManager : MonoBehaviour {
 
     public static CombatFeedbackManager Instance {get; private set;}
 
+    [Header("Fatal Hit")]
+    [SerializeField] private float fatalHitstopDuration = 0.06f;
+    [SerializeField] private float fatalSlowScale = 0.15f;
+    [SerializeField] private float fatalSlowDuration = 0.35f;
+    [SerializeField] private CinemachineImpulseSource fatalImpulseSource;
+    [SerializeField] private float fatalImpulseForce = 1.5f;
+
+    private Coroutine timeScaleRoutine;
+    private Coroutine cameraShakeRoutine;
+    private float defaultFixedDeltaTime;
+
     void Awake() {
         if(Instance != null && Instance != this) {
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        defaultFixedDeltaTime = Time.fixedDeltaTime;
     }
     #region  feedback functions
     public void PlayParryFeedback(AttackContext context, DamageData data) {
@@ -30,13 +43,30 @@ public class CombatFeedbackManager : MonoBehaviour {
         PlayHitVFX(ctx, data);
     }
 
+    public void PlayFatalHitFeedback(AttackContext ctx, DamageData data) {
+        if(ctx.hitFeedbackData != null) {
+            PlayHitVFX(ctx, data);
+        }
+
+        PlayFatalSlowMotion();
+
+        
+        if(fatalImpulseSource != null) {
+            Vector3 shakeVel = -ctx.attackDirection.normalized * fatalImpulseForce;
+            fatalImpulseSource.GenerateImpulseAtPositionWithVelocity(data.hitPoint, shakeVel);
+        }
+    }
+
     #endregion
 
 
     #region Effects functions
 
     private void PlayHitstopEffect(float duration) {
-        StartCoroutine(HitstopRoutine(duration));
+        if(timeScaleRoutine != null) {
+            StopCoroutine(timeScaleRoutine);
+        }
+        timeScaleRoutine = StartCoroutine(HitstopRoutine(duration));
     }
 
     private void PlayParryVisualEffect(AttackContext context, DamageData data) {
@@ -56,18 +86,36 @@ public class CombatFeedbackManager : MonoBehaviour {
     }
 
     IEnumerator HitstopRoutine(float duration) {
-        print(duration);
-        float oldScale = Time.timeScale;
-        float oldDelta = Time.fixedDeltaTime;
         Time.timeScale = 0f;
         Time.fixedDeltaTime = 0f;
 
         yield return new WaitForSecondsRealtime(duration);
 
         Time.timeScale = 1f;
-        Time.fixedDeltaTime = 0.02f;
+        Time.fixedDeltaTime = defaultFixedDeltaTime;
+        timeScaleRoutine = null;
 
     }
+
+    private void PlayFatalSlowMotion() {
+        StartCoroutine(FatalSlowMotionHitRoutine());
+    }
+
+    private IEnumerator FatalSlowMotionHitRoutine() {
+        
+        float defaultTimeDelta = Time.fixedDeltaTime;
+        Time.timeScale = 0f;
+        Time.fixedDeltaTime = 0f;
+        yield return new WaitForSecondsRealtime(fatalHitstopDuration);
+        Time.timeScale = fatalSlowScale;
+        Time.fixedDeltaTime = defaultFixedDeltaTime* Time.timeScale;
+        yield return new WaitForSecondsRealtime(fatalSlowDuration);
+        Time.timeScale = 1;
+        Time.fixedDeltaTime = defaultFixedDeltaTime;
+
+    }
+
+    
     #endregion
 
 }
